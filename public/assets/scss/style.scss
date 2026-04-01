@@ -1,0 +1,85 @@
+@import 'themes-vars.module.scss';
+@import 'plugins/plugins';
+
+/* breadcrumb */
+.icon-breadcrumb {
+  margin-right: 5px;
+}
+
+.link-breadcrumb {
+  font-size: 0.75rem;
+  display: flex;
+  text-decoration: none;
+}
+
+/* card */
+
+.card-header {
+  font-weight: 600 !important;
+  font-size: 15px;
+}
+
+.apexcharts-legend-marker {
+  margin-right: 8px !important;
+}
+
+.f-right {
+  float: right;
+}
+.p-0 {
+  padding: 0 !important;
+}
+.p-20 {
+  padding: 20px !important;
+}
+
+.apexcharts-legend-text {
+  padding-right: 4px;
+}
+
+.css-7blk3r-MuiButtonBase-root-MuiButton-root {
+  color: $textDarkDark !important;
+}
+
+body{
+margin:0;
+font-family:Arial;
+background:#f5f7fb;
+}
+
+.wrapper{
+display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:220px;
+background:#1e63d5;
+min-height:100vh;
+color:white;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+/* HEADER */
+
+.header{
+background:#f1f1f1;
+padding:15px 25px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* CONTENT */
+
+.content{
+padding:30px;
+}
