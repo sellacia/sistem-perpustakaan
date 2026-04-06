@@ -6,7 +6,7 @@
 
     <style>
         body {
-            background: linear-gradient(to right, #cfd9df, #e2ebf0); /* ✅ sama kayak login */
+            background: linear-gradient(to right, #cfd9df, #e2ebf0);
             font-family: Arial;
             display: flex;
             justify-content: center;
@@ -77,6 +77,13 @@
 </head>
 
 <body>
+    @if ($errors->any())
+    <div style="color:red">
+        @foreach ($errors->all() as $error)
+            <p>{{ $error }}</p>
+        @endforeach
+    </div>
+@endif
 
     <div class="container">
 
@@ -86,28 +93,28 @@
             @csrf
 
             <div class="form-group">
-                <label>Nama</label>
-                <input type="text" name="username">
+                <label>Username</label>
+                <input type="text" name="username" required>
             </div>
 
             <div class="form-group">
                 <label>Alamat</label>
-                <input type="text" name="alamat">
+                <input type="text" name="alamat" required>
             </div>
 
             <div class="form-group">
                 <label>No Telepon</label>
-                <input type="text" name="no_telp">
+                <input type="text" name="no_telp" required>
             </div>
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password">
+                <input type="password" name="password" required>
             </div>
 
             <div class="form-group">
                 <label>Confirm Password</label>
-                <input type="password" name="password_confirmation">
+                <input type="password" name="password_confirmation" required>
             </div>
 
             <div class="btn">

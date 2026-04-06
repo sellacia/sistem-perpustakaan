@@ -3,7 +3,7 @@
 
     <!-- SIDEBAR -->
     <div class="w-64 h-screen bg-blue-700 text-white fixed">
-        @include('layouts.sidebar')
+        @include('layouts.anggota.sidebar')
     </div>
 
     <!-- CONTENT -->
@@ -11,7 +11,7 @@
 
         <!-- HEADER -->
         <div class="bg-white p-4 shadow flex justify-end">
-            @include('layouts.header')
+            @include('layouts.anggota.header')
         </div>
 
         <!-- ISI -->
@@ -23,7 +23,15 @@
         <script>
             lucide.createIcons();
         </script>
-
     </div>
+    <script>
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+    </script>
 
 </div>

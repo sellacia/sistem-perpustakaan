@@ -21,7 +21,6 @@
             <span>Buku</span>
         </a>
 
-
         <!-- Pengembalian -->
         <a href="/pengembalian"
             class="flex items-center gap-3 p-3 rounded-xl transition
@@ -39,9 +38,20 @@
         </a>
 
         <!-- Logout -->
-        <a href="/logout" class="flex items-center gap-3 p-3 rounded-xl text-white hover:bg-red-500 transition">
+        <button onclick="alert('klik'); openLogoutModal()"
+            class="flex items-center gap-3 p-3 w-full text-left text-white hover:bg-red-500 rounded-xl">
+
             <i data-lucide="log-out" class="w-5 h-5"></i>
             <span>Logout</span>
-        </a>
+        </button>
+        <script>
+            function openLogoutModal() {
+                document.getElementById('logoutModal').classList.remove('hidden');
+            }
+
+            function closeLogoutModal() {
+                document.getElementById('logoutModal').classList.add('hidden');
+            }
+        </script>
 
 </div>

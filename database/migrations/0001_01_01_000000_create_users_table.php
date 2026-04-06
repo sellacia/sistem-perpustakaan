@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('alamat');
             $table->string('no_telp');
             $table->string('password');
+            $table->enum('role', ['anggota', 'petugas', 'kepala'])->default('anggota'); // 🔥 role aman
             $table->rememberToken();
             $table->timestamps();
         });
@@ -28,8 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users'); // 🔥 cukup ini aja
     }
 };

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -21,36 +21,46 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    // PROSES LOGIN (PAKAI NAME)
+    // 🔥 LOGIN FIX + ROLE
     public function login(Request $request)
-{
-    if (Auth::attempt([
-        'name' => $request->username, // ✅ pakai name
-        'password' => $request->password
-    ])) {
-        return redirect('/dashboard');
+    {
+        if (Auth::attempt([
+            'username' => $request->username,
+            'password' => $request->password
+        ])) {
+
+            $user = Auth::user();
+
+            // 🔥 BEDAIN ROLE
+            if ($user->role == 'petugas') {
+                return redirect('/dashboard-petugas');
+            } else {
+                return redirect('/dashboard');
+            }
+        }
+
+        return back()->with('error', 'Username atau password salah');
     }
 
-    return back()->with('error', 'Username atau password salah');
-}
+    // 🔥 REGISTER FIX
+    public function register(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|unique:users,username',
+            'alamat' => 'required',
+            'no_telp' => 'required',
+            'password' => 'required|confirmed|min:4'
+        ]);
 
-   // PROSES REGISTER
-public function register(Request $request)
-{
-    $request->validate([
-        'username' => 'required|unique:users,name',
-        'alamat' => 'required',
-        'no_telp' => 'required',
-        'password' => 'required|confirmed|min:4'
-    ]);
+        User::create([
+            'name' => $request->username,
+            'username' => $request->username,
+            'alamat' => $request->alamat,
+            'no_telp' => $request->no_telp,
+            'password' => Hash::make($request->password),
+            'role' => 'anggota'
+        ]);
 
-    User::create([
-    'name' => $request->username, // ✅ WAJIB ADA
-    'email' => $request->username . '@dummy.com',
-    'alamat' => $request->alamat,
-    'no_telp' => $request->no_telp,
-    'password' => Hash::make($request->password)
-]);
-    return redirect('/login')->with('success', 'Register berhasil!');
-}
+        return redirect('/login')->with('success', 'Register berhasil!');
+    }
 }

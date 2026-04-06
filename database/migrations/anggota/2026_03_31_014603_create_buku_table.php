@@ -6,28 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_buku');
+            $table->string('kode_buku')->unique();
             $table->string('judul');
             $table->string('pengarang');
             $table->string('penerbit');
             $table->year('tahun');
-            $table->integer('stok');
-            $table->string('status');
+            $table->integer('stok')->default(0);
+            $table->enum('status', ['tersedia', 'dipinjam'])->default('tersedia');
             $table->string('cover')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('buku');

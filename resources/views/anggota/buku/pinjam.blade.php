@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.anggota.app')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 
     <div class="bg-white p-6 rounded-xl shadow">
 
-        <form action="/buku/{{ $buku->id }}/pinjam" method="POST">
+        <form action="{{ route('buku.pinjam', $buku->id) }}" method="POST">
             @csrf
 
             <!-- NAMA -->
@@ -16,7 +16,7 @@
                 <label class="block mb-1">Nama</label>
                 <input type="text" name="nama"
                     class="w-full border rounded p-2"
-                    placeholder="Masukkan nama">
+                    placeholder="Masukkan nama" required>
             </div>
 
             <!-- BUKU -->
@@ -34,7 +34,7 @@
                     Batal
                 </a>
 
-                <button class="bg-green-600 text-white px-4 py-2 rounded">
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
                     Konfirmasi
                 </button>
             </div>

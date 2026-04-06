@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.anggota.app')
 
 @section('content')
     <div class="p-6">
@@ -48,7 +48,7 @@
                             Detail
                         </a>
 
-                        <a href="/buku/{{ $item->id }}/pinjam"
+                        <a href="{{ route('buku.formPinjam', $item->id) }}"
                             class="bg-orange-500 text-white px-3 py-1 rounded text-xs">
                             Pinjam Buku
                         </a>

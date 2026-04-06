@@ -1,32 +1,70 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BukuController;
-use App\Http\Controllers\PengembalianController;
 
-// LOGIN
+// ===== ANGGOTA =====
+use App\Http\Controllers\anggota\DashboardController as DashboardAnggotaController;
+use App\Http\Controllers\anggota\BukuController as BukuAnggotaController;
+use App\Http\Controllers\anggota\PengembalianController;
+use App\Http\Controllers\anggota\DendaController;
+
+// ===== PETUGAS =====
+use App\Http\Controllers\Petugas\DashboardController as DashboardPetugasController;
+use App\Http\Controllers\Petugas\BukuController as BukuPetugasController;
+
+
+// ================= LOGIN =================
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// REGISTER
+
+// ================= REGISTER =================
 Route::get('/register', [AuthController::class, 'showRegister']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// DASHBOARD
-Route::get('/dashboard', function () {
-    return "Berhasil login 🎉";
-});
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-// BUKU
-Route::get('/buku', [BukuController::class, 'index'])->name('buku');
-Route::get('/buku/{id}', [BukuController::class, 'show'])->name('buku.detail');
-Route::get('/buku/{id}/pinjam', [BukuController::class, 'formPinjam']);
-Route::post('/buku/{id}/pinjam', [BukuController::class, 'prosesPinjam']);
+// ================= DASHBOARD (ANGGOTA) =================
+Route::get('/dashboard', [DashboardAnggotaController::class, 'index'])->name('dashboard');
 
-// PENGEMBALIAN
+
+// ================= BUKU (ANGGOTA) =================
+Route::get('/buku', [BukuAnggotaController::class, 'index'])->name('buku');
+Route::get('/buku/{id}', [BukuAnggotaController::class, 'show'])->name('buku.detail');
+
+
+// ================= PINJAM =================
+Route::get('/pinjam/{id}', [BukuAnggotaController::class, 'formPinjam'])->name('buku.formPinjam');
+Route::post('/pinjam/{id}', [BukuAnggotaController::class, 'prosesPinjam'])->name('buku.pinjam');
+
+
+// ================= PENGEMBALIAN =================
 Route::get('/pengembalian', [PengembalianController::class, 'index']);
-Route::post('/pengembalian/proses', [PengembalianController::class, 'proses']);
+Route::post('/pengembalian/proses', [PengembalianController::class, 'proses'])->name('pengembalian.proses');
+
+
+// ================= DENDA =================
+Route::get('/denda', [DendaController::class, 'index']);
+Route::post('/denda/{id}/bayar', [DendaController::class, 'bayar'])->name('denda.bayar');
+
+
+// ================= DASHBOARD (PETUGAS) =================
+Route::get('/dashboard-petugas', [DashboardPetugasController::class, 'index']);
+
+
+// ================= BUKU (PETUGAS) =================
+Route::prefix('petugas')->group(function () {
+    Route::resource('buku', BukuPetugasController::class);
+});
+Route::get('/petugas/buku/{id}', [BukuPetugasController::class, 'show']);
+Route::get('/petugas/buku/{id}/edit', [BukuPetugasController::class, 'edit']);
+Route::put('/petugas/buku/{id}', [BukuPetugasController::class, 'update']);
+Route::delete('/petugas/buku/{id}', [BukuPetugasController::class, 'destroy']);
+
+// ================= LOGOUT =================
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/login');
+})->name('logout');

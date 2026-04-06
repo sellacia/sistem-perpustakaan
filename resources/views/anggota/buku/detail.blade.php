@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.anggota.app')
 
 @section('content')
     <div class="p-6">
