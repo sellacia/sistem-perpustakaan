@@ -18,9 +18,9 @@ class Denda extends Model
         'status'
     ];
 
-    // 🔥 RELASI KE PEMINJAMAN
+    //  RELASI KE PEMINJAMAN
     public function peminjaman()
     {
-        return $this->belongsTo(\App\Models\Peminjaman::class);
+        return $this->belongsTo(Peminjaman::class);
     }
 }

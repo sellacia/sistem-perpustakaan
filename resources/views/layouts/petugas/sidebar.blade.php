@@ -16,11 +16,9 @@ fixed top-0 left-0 z-50">
 
         <!-- Dashboard -->
         <li>
-            <a href="/dashboard-petugas"
+            <a href="/petugas/dashboard"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('dashboard-petugas')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/dashboard') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-home"></i>
                 Dashboard
             </a>
@@ -30,9 +28,7 @@ fixed top-0 left-0 z-50">
         <li>
             <a href="/petugas/buku"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/buku*')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/buku*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-book"></i>
                 Kelola Buku
             </a>
@@ -42,9 +38,7 @@ fixed top-0 left-0 z-50">
         <li>
             <a href="/petugas/peminjaman"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/peminjaman*')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/peminjaman*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-hand-holding"></i>
                 Proses Peminjaman
             </a>
@@ -54,9 +48,7 @@ fixed top-0 left-0 z-50">
         <li>
             <a href="/petugas/pengembalian"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/pengembalian*')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/pengembalian*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-undo"></i>
                 Proses Pengembalian
             </a>
@@ -66,9 +58,7 @@ fixed top-0 left-0 z-50">
         <li>
             <a href="/petugas/denda"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/denda*')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/denda*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-money-bill-wave"></i>
                 Kelola Denda
             </a>
@@ -78,11 +68,19 @@ fixed top-0 left-0 z-50">
         <li>
             <a href="/petugas/laporan"
                 class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/laporan*')
-                ? 'bg-blue-800 text-white shadow-md'
-                : 'hover:bg-blue-600 text-white' }}">
+                {{ request()->is('petugas/laporan*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-file-alt"></i>
                 Kelola Laporan
+            </a>
+        </li>
+
+        <!-- Data Anggota -->
+        <li>
+            <a href="/petugas/anggota"
+                class="flex items-center gap-3 p-3 rounded-lg transition
+        {{ request()->is('petugas/anggota*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
+                <i class="fas fa-users"></i>
+                Data Anggota
             </a>
         </li>
 

@@ -8,43 +8,9 @@ use App\Models\Buku;
 
 class BukuController extends Controller
 {
-    public function store(Request $request)
-    {
-        Buku::create([
-            'kode_buku' => $request->kode_buku,
-            'judul' => $request->judul,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun,
-            'kategori' => $request->kategori,
-            'stok' => $request->stok,
-            'status' => $request->status,
-        ]);
-
-        return redirect('/petugas/buku')->with('success', 'Buku berhasil ditambahkan!');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $buku = Buku::findOrFail($id);
-
-        $buku->update([
-            'kode_buku' => $request->kode_buku,
-            'judul' => $request->judul,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun,
-            'kategori' => $request->kategori,
-            'stok' => $request->stok,
-            'status' => $request->status,
-        ]);
-
-        return redirect('/petugas/buku')->with('success', 'Buku berhasil diupdate!');
-    }
-
     public function index()
     {
-        $buku = Buku::all();
+        $buku = Buku::latest()->get();
         return view('petugas.dashboard.buku.index', compact('buku'));
     }
 
@@ -53,18 +19,70 @@ class BukuController extends Controller
         return view('petugas.dashboard.buku.create');
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'kode_buku' => 'required',
+            'judul' => 'required',
+            'pengarang' => 'required',
+            'penerbit' => 'required',
+            'tahun' => 'required',
+            'stok' => 'required|integer',
+            'status' => 'required'
+        ]);
+
+        Buku::create([
+            'kode_buku' => $request->kode_buku,
+            'judul' => $request->judul,
+            'pengarang' => $request->pengarang,
+            'penerbit' => $request->penerbit,
+            'tahun' => $request->tahun,
+            'stok' => $request->stok,
+            'status' => $request->status,
+        ]);
+
+        return redirect('/petugas/buku')->with('success', 'Buku berhasil ditambahkan!');
+    }
+
     public function edit($id)
     {
         $buku = Buku::findOrFail($id);
         return view('petugas.dashboard.buku.edit', compact('buku'));
     }
 
-    // INI YANG DIPERBAIKI (dari detail → show)
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'kode_buku' => 'required',
+            'judul' => 'required',
+            'pengarang' => 'required',
+            'penerbit' => 'required',
+            'tahun' => 'required',
+            'stok' => 'required|integer',
+            'status' => 'required'
+        ]);
+
+        $buku = Buku::findOrFail($id);
+
+        $buku->update([
+            'kode_buku' => $request->kode_buku,
+            'judul' => $request->judul,
+            'pengarang' => $request->pengarang,
+            'penerbit' => $request->penerbit,
+            'tahun' => $request->tahun,
+            'stok' => $request->stok,
+            'status' => $request->status,
+        ]);
+
+        return redirect('/petugas/buku')->with('success', 'Buku berhasil diupdate!');
+    }
+
     public function show($id)
     {
         $buku = Buku::findOrFail($id);
         return view('petugas.dashboard.buku.detail', compact('buku'));
     }
+
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);

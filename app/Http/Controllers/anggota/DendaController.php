@@ -9,7 +9,7 @@ class DendaController extends Controller
 {
     public function index()
     {
-        // 🔥 ambil dari tabel denda (BUKAN peminjaman lagi)
+        // ambil dari tabel denda (BUKAN peminjaman lagi)
         $data = Denda::with('peminjaman.buku')->latest()->get();
 
         return view('anggota.denda.index', compact('data'));

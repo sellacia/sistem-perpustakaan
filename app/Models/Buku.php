@@ -27,4 +27,9 @@ class Buku extends Model
 
     // Kalau gak pakai created_at & updated_at
     public $timestamps = false;
+
+    public function peminjaman()
+    {
+        return $this->hasMany(\App\Models\Peminjaman::class, 'buku_id');
+    }
 }

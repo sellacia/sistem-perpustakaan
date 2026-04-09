@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\anggota;
+namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,42 +12,51 @@ class BukuController extends Controller
     {
         $search = trim($request->search);
 
+        $query = Buku::with('peminjaman')
+                    ->where('stok', '>', 0); //  FILTER STOK
+
         if ($search) {
-            $buku = Buku::where('judul', 'like', "%$search%")
-                ->orWhere('pengarang', 'like', "%$search%")
-                ->orWhere('kode_buku', 'like', "%$search%")
-                ->get();
-        } else {
-            $buku = Buku::all();
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%$search%")
+                  ->orWhere('pengarang', 'like', "%$search%")
+                  ->orWhere('kode_buku', 'like', "%$search%");
+            });
         }
 
-        return view('anggota.buku.index', compact('buku')); //  FIX
+        $buku = $query->get();
+
+        return view('anggota.buku.index', compact('buku'));
     }
 
     public function show($id)
     {
         $buku = Buku::findOrFail($id);
-        return view('anggota.buku.detail', compact('buku')); //  FIX
+        return view('anggota.buku.detail', compact('buku'));
     }
 
     public function formPinjam($id)
     {
         $buku = Buku::findOrFail($id);
-        return view('anggota.buku.pinjam', compact('buku')); //  FIX
+        return view('anggota.buku.pinjam', compact('buku'));
     }
 
     public function prosesPinjam(Request $request, $id)
     {
         $buku = Buku::findOrFail($id);
 
+        //  CEGAH STOK MINUS
         if ($buku->stok <= 0) {
             return redirect('/buku')->with('error', 'Stok habis!');
         }
 
-        $buku->stok -= 1;
+        // kurangi stok
+        $buku->decrement('stok');
 
+        // update status
         if ($buku->stok == 0) {
             $buku->status = 'dipinjam';
+        } else {
+            $buku->status = 'tersedia';
         }
 
         $buku->save();

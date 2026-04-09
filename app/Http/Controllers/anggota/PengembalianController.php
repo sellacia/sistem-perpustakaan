@@ -1,102 +1,70 @@
 <?php
 
-namespace App\Http\Controllers\anggota;
+namespace App\Http\Controllers\Anggota;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
-use App\Models\anggota\Buku;
+use App\Models\Buku;
 use App\Models\Denda;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PengembalianController extends Controller
 {
     public function index()
     {
-        // ambil SEMUA data peminjaman yang masih dipinjam
-        $pinjam = Peminjaman::where('status', 'dipinjam')->first();
+        $pinjam = Peminjaman::with('buku')
+            ->where('nama', Auth::user()->name)
+            ->where('status', 'dipinjam')
+            ->get();
 
-        if (!$pinjam) {
-            return view('anggota.pengembalian.index', [
-                'pinjam' => null,
-                'buku' => null,
-                'tanggal_pinjam' => null,
-                'batas_kembali' => null,
-                'tanggal_kembali' => null,
-                'terlambat' => 0,
-                'denda' => 0
-            ]);
-        }
-
-        $buku = Buku::find($pinjam->buku_id);
-
-        $tanggal_pinjam = Carbon::parse($pinjam->tanggal_pinjam);
-        $batas_kembali = Carbon::parse($pinjam->batas_kembali);
-        $tanggal_kembali = Carbon::now();
-
-        $terlambat = 0;
-        $denda = 0;
-
-        if ($tanggal_kembali > $batas_kembali) {
-            $terlambat = $tanggal_kembali->diffInDays($batas_kembali);
-            $denda = $terlambat * 2000;
-        }
-
-        return view('anggota.pengembalian.index', compact(
-            'pinjam',
-            'buku',
-            'tanggal_pinjam',
-            'batas_kembali',
-            'tanggal_kembali',
-            'terlambat',
-            'denda'
-        ));
+        return view('anggota.pengembalian.index', compact('pinjam'));
     }
 
     public function proses(Request $request)
     {
-        // 🔥 VALIDASI
-        if (!$request->pinjam_id) {
-            return back()->with('error', 'Data peminjaman tidak ditemukan!');
-        }
+        $request->validate([
+            'pinjam_id' => 'required',
+            'tanggal_kembali' => 'required|date'
+        ]);
 
         $pinjam = Peminjaman::findOrFail($request->pinjam_id);
 
-        $today = Carbon::now();
-        $batas = Carbon::parse($pinjam->batas_kembali);
+        if ($pinjam->status != 'dipinjam') {
+            return back()->with('error', 'Sudah dikembalikan!');
+        }
+
+        $kembali = Carbon::parse($request->tanggal_kembali);
+        $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
 
         $terlambat = 0;
         $denda = 0;
 
-        if ($today > $batas) {
-            $terlambat = $today->diffInDays($batas);
+        if ($kembali->gt($batas)) {
+            $terlambat = $kembali->diffInDays($batas);
             $denda = $terlambat * 2000;
 
-            // 🔥 CEK BIAR GAK DOUBLE DENDA
-            $cek = Denda::where('peminjaman_id', $pinjam->id)->first();
-
-            if (!$cek) {
-                Denda::create([
+            if ($denda > 0) {
+                \App\Models\Denda::create([
                     'peminjaman_id' => $pinjam->id,
-                    'jumlah_denda' => $denda,
                     'terlambat' => $terlambat,
-                    'status' => 'belum'
+                    'total_denda' => $denda,
+                    'status' => 'belum_bayar'
                 ]);
             }
         }
 
-        // update peminjaman
-        $pinjam->status = 'kembali';
-        $pinjam->save();
+        $pinjam->update([
+            'status' => 'dikembalikan',
+            'tanggal_kembali' => $kembali
+        ]);
 
-        // update buku
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
-            $buku->stok += 1;
-            $buku->status = 'tersedia';
-            $buku->save();
+            $buku->increment('stok');
         }
 
-        return redirect('/pengembalian')->with('success', 'Pengembalian berhasil!');
+        return back()->with('success', 'Pengembalian berhasil!');
     }
 }

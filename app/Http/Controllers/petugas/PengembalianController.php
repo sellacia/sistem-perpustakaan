@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers\Petugas;
+
+use App\Http\Controllers\Controller;
+use App\Models\Peminjaman;
+use App\Models\Buku;
+
+class PengembalianController extends Controller
+{
+    // tampilkan data pengembalian
+    public function index()
+    {
+        $pinjam = \App\Models\Peminjaman::with('buku')
+            ->where('status', 'dikembalikan')
+            ->latest()
+            ->get();
+
+        return view('petugas.pengembalian.index', compact('pinjam'));
+    }
+
+    public function konfirmasi($id)
+    {
+        $pinjam = Peminjaman::with('buku')->findOrFail($id);
+
+        // tambah stok buku
+        if ($pinjam->buku) {
+            $pinjam->buku->increment('stok');
+        }
+
+        $pinjam->update([
+            'status' => 'selesai'
+        ]);
+
+        return back()->with('success', 'Pengembalian dikonfirmasi!');
+    }
+}

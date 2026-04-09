@@ -21,21 +21,31 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    // 🔥 LOGIN FIX + ROLE
+    // 🔥 LOGIN FIX + MULTI ROLE
     public function login(Request $request)
     {
+        // VALIDASI
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        // CEK LOGIN
         if (Auth::attempt([
             'username' => $request->username,
             'password' => $request->password
         ])) {
 
+            $request->session()->regenerate();
             $user = Auth::user();
 
-            // 🔥 BEDAIN ROLE
+            // 🔥 REDIRECT SESUAI ROLE
             if ($user->role == 'petugas') {
-                return redirect('/dashboard-petugas');
+                return redirect('/petugas/dashboard');
+            } elseif ($user->role == 'kepala_perpustakaan') {
+                return redirect('/kepala/dashboard');
             } else {
-                return redirect('/dashboard');
+                return redirect('/anggota/dashboard');
             }
         }
 
@@ -57,10 +67,21 @@ class AuthController extends Controller
             'username' => $request->username,
             'alamat' => $request->alamat,
             'no_telp' => $request->no_telp,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password), // 🔥 WAJIB HASH
             'role' => 'anggota'
         ]);
 
         return redirect('/login')->with('success', 'Register berhasil!');
+    }
+
+    // 🔥 LOGOUT
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }
