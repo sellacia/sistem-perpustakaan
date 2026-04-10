@@ -15,7 +15,7 @@ class PengembalianController extends Controller
     public function index()
     {
         $pinjam = Peminjaman::with('buku')
-            ->where('nama', Auth::user()->name)
+            ->where('anggota_id', Auth::id())
             ->where('status', 'dipinjam')
             ->get();
 
@@ -25,17 +25,16 @@ class PengembalianController extends Controller
     public function proses(Request $request)
     {
         $request->validate([
-            'pinjam_id' => 'required',
-            'tanggal_kembali' => 'required|date'
+            'pinjam_id' => 'required'
         ]);
 
-        $pinjam = Peminjaman::findOrFail($request->pinjam_id);
+        $pinjam = Peminjaman::where('anggota_id', Auth::id())->findOrFail($request->pinjam_id);
 
         if ($pinjam->status != 'dipinjam') {
-            return back()->with('error', 'Sudah dikembalikan!');
+            return back()->with('error', 'Sudah dikembalikan atau status tidak valid!');
         }
 
-        $kembali = Carbon::parse($request->tanggal_kembali);
+        $kembali = Carbon::today();
         $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
 
         $terlambat = 0;
@@ -49,7 +48,7 @@ class PengembalianController extends Controller
                 \App\Models\Denda::create([
                     'peminjaman_id' => $pinjam->id,
                     'terlambat' => $terlambat,
-                    'total_denda' => $denda,
+                    'jumlah_denda' => $denda,
                     'status' => 'belum_bayar'
                 ]);
             }

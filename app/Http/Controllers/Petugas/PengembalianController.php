@@ -23,10 +23,8 @@ class PengembalianController extends Controller
     {
         $pinjam = Peminjaman::with('buku')->findOrFail($id);
 
-        // tambah stok buku
-        if ($pinjam->buku) {
-            $pinjam->buku->increment('stok');
-        }
+        // Stok sudah ditambahkan secara otomatis pada saat anggota memulangkan buku (dikembalikan)
+        // Jadi kita hanya perlu mengubah statusnya jadi selesai saja.
 
         $pinjam->update([
             'status' => 'selesai'

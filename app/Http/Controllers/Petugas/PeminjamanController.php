@@ -12,7 +12,30 @@ class PeminjamanController extends Controller
 {
     public function index()
     {
-        $data = Peminjaman::with(['buku', 'anggota'])->latest()->get();
+        $today = Carbon::today();
+
+        // Otomatis cek peminjaman yang telat di seluruh sistem
+        $peminjamanTelat = Peminjaman::where('status', 'dipinjam')
+            ->where('tanggal_wajib_kembali', '<', $today)
+            ->get();
+
+        foreach ($peminjamanTelat as $pinjam) {
+            $pinjam->update(['status' => 'terlambat']);
+            
+            $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
+            $terlambat = $today->diffInDays($batas);
+
+            Denda::updateOrCreate(
+                ['peminjaman_id' => $pinjam->id],
+                [
+                    'terlambat' => $terlambat,
+                    'jumlah_denda' => $terlambat * 2000,
+                    'status' => 'belum_bayar'
+                ]
+            );
+        }
+
+        $data = Peminjaman::with(['buku', 'anggota', 'denda'])->latest()->get();
         return view('petugas.peminjaman.index', compact('data'));
     }
 
@@ -34,10 +57,8 @@ class PeminjamanController extends Controller
             'tanggal_wajib_kembali' => now()->addDays(3)
         ]);
 
-        // kurangi stok DI SINI (bukan di anggota)
-        if ($buku) {
-            $buku->decrement('stok');
-        }
+        // Stok sudah dikurangi semenjak peminjaman dari anggota,
+        // jadi kita hapus decrement di sini.
 
         return back()->with('success', 'Peminjaman disetujui!');
     }
@@ -49,6 +70,12 @@ class PeminjamanController extends Controller
         $pinjam->update([
             'status' => 'ditolak'
         ]);
+
+        // Karena stok dikurangi diawal submit, bila ditolak kita wajib mengembalikan stoknya.
+        $buku = Buku::find($pinjam->buku_id);
+        if ($buku) {
+            $buku->increment('stok');
+        }
 
         return back()->with('success', 'Peminjaman ditolak!');
     }
@@ -86,7 +113,7 @@ class PeminjamanController extends Controller
             Denda::create([
                 'peminjaman_id' => $pinjam->id,
                 'terlambat' => $terlambat,
-                'total_denda' => $denda,
+                'jumlah_denda' => $denda,
                 'status' => 'belum_bayar'
             ]);
         }

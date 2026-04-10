@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
+    public function index()
+    {
+        $peminjaman = Peminjaman::with('buku')
+                        ->where('anggota_id', Auth::id())
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+        return view('anggota.peminjaman.index', compact('peminjaman'));
+    }
+
     public function store(Request $request, $id)
     {
         $buku = Buku::findOrFail($id);
@@ -30,8 +39,8 @@ class PeminjamanController extends Controller
             'status' => 'menunggu'
         ]);
 
-        // HAPUS pengurangan stok di sini
-        // stok akan dikurangi saat petugas konfirmasi
+        // Kurangi stok seketika saat diajukan agar tidak dipinjam anggota lain secara bersamaan
+        $buku->decrement('stok');
 
         return redirect()->route('anggota.buku')
             ->with('success', 'Pengajuan peminjaman berhasil!');

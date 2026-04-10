@@ -60,17 +60,16 @@
                             <!-- AKSI -->
                             <td class="p-3">
                                 @if ($item->status == 'dikembalikan')
-                                    <button
+                                    <button type="button"
                                         onclick="openModal(
-                                    {{ $item->id }},
-                                    {{ $item->nama }}
-                                    '{{ $item->buku->judul }}'
-                                )"
-                                        <a href="/petugas/peminjaman/setujui/{{ $item->id }}"
-                                        class="bg-green-500 text-white px-3 py-1 rounded">
+                                            {{ $item->id }},
+                                            '{{ addslashes($item->nama ?? ($item->anggota->name ?? '-')) }}',
+                                            '{{ addslashes($item->buku->judul ?? '-') }}'
+                                        )"
+                                        class="bg-green-500 hover:bg-green-600 transition text-white px-3 py-1 rounded">
                                         Konfirmasi
-                                        </a>
-                                    @else
+                                    </button>
+                                @else
                                         <span class="text-gray-400 text-xs">-</span>
                                 @endif
                             </td>

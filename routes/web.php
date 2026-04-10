@@ -9,7 +9,7 @@ use App\Http\Controllers\Anggota\DashboardController as DashboardAnggotaControll
 use App\Http\Controllers\Anggota\BukuController as BukuAnggotaController;
 use App\Http\Controllers\Anggota\PeminjamanController as AnggotaPeminjaman;
 use App\Http\Controllers\Anggota\PengembalianController as AnggotaPengembalianController;
-use App\Http\Controllers\Anggota\DendaController as AnggotaDendaController;
+use App\Http\Controllers\Anggota\RiwayatController as AnggotaRiwayatController;
 
 // ===== PETUGAS =====
 use App\Http\Controllers\Petugas\DashboardController as DashboardPetugasController;
@@ -41,9 +41,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('anggota')->group(function () {
 
         Route::get('/dashboard', [DashboardAnggotaController::class, 'index'])->name('anggota.dashboard');
+        Route::post('/logout', [DashboardAnggotaController::class, 'logout'])->name('anggota.logout');
 
         Route::get('/buku', [BukuAnggotaController::class, 'index'])->name('anggota.buku');
         Route::get('/buku/{id}', [BukuAnggotaController::class, 'show'])->name('anggota.buku.detail');
+        
+        Route::get('/peminjaman', [AnggotaPeminjaman::class, 'index'])->name('anggota.peminjaman');
 
         Route::get('/pinjam/{id}', [BukuAnggotaController::class, 'formPinjam'])->name('anggota.pinjam.form');
         Route::post('/pinjam/{id}', [AnggotaPeminjaman::class, 'store'])->name('anggota.pinjam');
@@ -51,9 +54,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengembalian', [AnggotaPengembalianController::class, 'index'])->name('anggota.pengembalian');
         Route::post('/pengembalian/proses', [AnggotaPengembalianController::class, 'proses'])->name('anggota.pengembalian.proses');
 
-        //  DENDA ANGGOTA
-        Route::get('/denda', [AnggotaDendaController::class, 'index'])->name('anggota.denda');
-        Route::post('/denda/{id}/bayar', [AnggotaDendaController::class, 'bayar'])->name('anggota.denda.bayar');
+        //  RIWAYAT ANGGOTA
+        Route::get('/riwayat', [AnggotaRiwayatController::class, 'index'])->name('anggota.riwayat');
+        Route::post('/riwayat/{id}/bayar', [AnggotaRiwayatController::class, 'bayar'])->name('anggota.riwayat.bayar');
     });
 
 

@@ -72,24 +72,28 @@
                                 <!-- STATUS -->
                                 <td class="px-4 py-3 text-center">
                                     @if ($item->status == 'menunggu')
-                                        <span
-                                            class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
                                             Menunggu
                                         </span>
                                     @elseif ($item->status == 'dipinjam')
-                                        <span
-                                            class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                                             Dipinjam
                                         </span>
-                                    @elseif ($item->status == 'kembali')
-                                        <span
-                                            class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                            Kembali
+                                    @elseif ($item->status == 'dikembalikan')
+                                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            Dikembalikan
                                         </span>
                                     @elseif ($item->status == 'ditolak')
-                                        <span
-                                            class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
                                             Ditolak
+                                        </span>
+                                    @elseif ($item->status == 'selesai')
+                                        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            Selesai
+                                        </span>
+                                    @elseif ($item->status == 'terlambat')
+                                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                                            Terlambat (Denda)
                                         </span>
                                     @endif
                                 </td>
@@ -99,18 +103,20 @@
                                     @if ($item->status == 'menunggu')
                                         <div class="flex justify-center gap-2">
                                             <a href="/petugas/peminjaman/setujui/{{ $item->id }}"
-                                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs">
+                                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs" title="Setujui">
                                                 ✔
                                             </a>
 
                                             <a href="/petugas/peminjaman/tolak/{{ $item->id }}"
-                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs">
+                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs" title="Tolak">
                                                 ✖
                                             </a>
                                         </div>
+                                    @elseif ($item->status == 'terlambat')
+                                        <p class="text-[10px] text-red-500 italic font-bold">Harap Kelola di Menu Denda</p>
                                     @else
                                         <span class="text-gray-400 text-xs italic">
-                                            Selesai
+                                            Tidak ada aksi
                                         </span>
                                     @endif
                                 </td>

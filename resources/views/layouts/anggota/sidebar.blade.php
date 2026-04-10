@@ -16,25 +16,25 @@
         <!-- Buku -->
         <a href="/anggota/buku"
             class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('buku*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
+       {{ request()->is('anggota/buku*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
             <i data-lucide="book-open" class="w-5 h-5"></i>
             <span>Buku</span>
+        </a>
+
+        <!-- Riwayat Peminjaman -->
+        <a href="/anggota/riwayat"
+            class="flex items-center gap-3 p-3 rounded-xl transition
+       {{ request()->is('anggota/riwayat*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
+            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            <span>Riwayat Peminjaman</span>
         </a>
 
         <!-- Pengembalian -->
         <a href="/anggota/pengembalian"
             class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('pengembalian*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
+       {{ request()->is('anggota/pengembalian*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
             <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
             <span>Pengembalian</span>
-        </a>
-
-        <!-- Denda -->
-        <a href="/anggota/denda"
-            class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('denda*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
-            <i data-lucide="alert-circle" class="w-5 h-5"></i>
-            <span>Denda</span>
         </a>
 
         <!-- Logout -->

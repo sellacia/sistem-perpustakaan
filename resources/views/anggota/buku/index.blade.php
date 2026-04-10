@@ -53,11 +53,13 @@
                 </a>
 
                 @if ($item->stok > 0)
-                    <!-- ✅ FIX PINJAM -->
-                    <a href="{{ route('anggota.pinjam.form', $item->id) }}"
-                        class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs">
-                        Pinjam Buku
-                    </a>
+                    <!-- ✅ FIX PINJAM DENGAN SWEETALERT2 -->
+                    <form action="{{ route('anggota.pinjam', $item->id) }}" method="POST" class="inline form-pinjam">
+                        @csrf
+                        <button type="button" class="btn-pinjam bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs">
+                            Pinjam Buku
+                        </button>
+                    </form>
                 @else
                     <button disabled class="bg-gray-400 text-white px-3 py-1 rounded text-xs">
                         Tidak Tersedia
@@ -80,4 +82,40 @@
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const pinjamButtons = document.querySelectorAll('.btn-pinjam');
+        pinjamButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('.form-pinjam');
+                
+                Swal.fire({
+                    title: 'Konfirmasi Peminjaman',
+                    text: 'Apakah Anda yakin ingin meminjam buku ini? Data akan segera diteruskan ke petugas.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Pinjam',
+                    cancelButtonText: 'Batal',
+                    background: '#ffffff',
+                    color: '#1e3a8a', // Dark blue text
+                    confirmButtonColor: '#2563eb', // Blue-600
+                    cancelButtonColor: '#9ca3af', // Gray-400
+                    customClass: {
+                        popup: 'rounded-2xl border border-blue-100 shadow-xl',
+                        title: 'text-xl font-bold text-blue-700',
+                        confirmButton: 'rounded-lg px-6 py-2 font-semibold',
+                        cancelButton: 'rounded-lg px-6 py-2 font-semibold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
 @endsection
