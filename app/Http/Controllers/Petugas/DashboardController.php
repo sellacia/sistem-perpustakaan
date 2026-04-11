@@ -14,12 +14,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $data = Peminjaman::with(['user', 'buku', 'denda'])
+            ->latest()
+            ->take(5) // ambil 5 data terbaru
+            ->get();
+
         return view('petugas.dashboard.index', [
             'totalBuku' => Buku::count(),
             'totalAnggota' => User::where('role', 'anggota')->count(),
             'dipinjam' => Peminjaman::whereIn('status', ['dipinjam', 'terlambat'])->count(),
             'terlambat' => Peminjaman::where('status', 'terlambat')->count(),
-            'denda' => Denda::where('status', 'sudah_bayar')->sum('jumlah_denda')
+            'denda' => Denda::where('status', 'belum_bayar')->sum('jumlah_denda'),
+            'data' => $data
         ]);
     }
 

@@ -46,14 +46,14 @@
             <!-- BUTTON -->
             <div class="mt-4 flex justify-center gap-2">
 
-                <!-- ✅ FIX DETAIL -->
+                <!-- FIX DETAIL -->
                 <a href="{{ route('anggota.buku.detail', $item->id) }}"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
                     Detail
                 </a>
 
                 @if ($item->stok > 0)
-                    <!-- ✅ FIX PINJAM DENGAN SWEETALERT2 -->
+                    <!--  FIX PINJAM DENGAN SWEETALERT2 -->
                     <form action="{{ route('anggota.pinjam', $item->id) }}" method="POST" class="inline form-pinjam">
                         @csrf
                         <button type="button" class="btn-pinjam bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs">
@@ -91,7 +91,7 @@
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const form = this.closest('.form-pinjam');
-                
+
                 Swal.fire({
                     title: 'Konfirmasi Peminjaman',
                     text: 'Apakah Anda yakin ingin meminjam buku ini? Data akan segera diteruskan ke petugas.',

@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Kepala Perpustakaan</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body class="bg-gray-100">
 
-    <div class="flex">
+<div class="flex">
 
-        {{-- SIDEBAR --}}
-        @include('layouts.kepala.sidebar')
+    <!-- SIDEBAR -->
+    @include('layouts.kepala.sidebar')
 
-        <div class="flex-1 ml-64">
+    <!-- CONTENT -->
+    <div class="flex-1 ml-64">
 
-            {{-- HEADER --}}
-            @include('layouts.kepala.header')
+        <!-- HEADER -->
+        @include('layouts.kepala.header')
 
-            {{-- CONTENT --}}
-            <main class="p-6">
-                @yield('content')
-            </main>
-
+        <!-- MAIN -->
+        <div class="p-6">
+            @yield('content')
         </div>
 
     </div>
+
+</div>
 
 </body>
 </html>

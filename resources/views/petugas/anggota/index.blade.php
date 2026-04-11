@@ -50,7 +50,7 @@
                             Edit
                         </a>
 
-                        <form action="{{ route('petugas.anggota.delete', $a->id) }}" method="POST">
+                        <form action="{{ route('petugas.anggota.destroy', $a->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
                             <button class="bg-red-500 px-3 py-1 rounded text-white">

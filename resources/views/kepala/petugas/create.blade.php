@@ -1,12 +1,12 @@
-@extends('layouts.petugas.app')
+@extends('layouts.kepala.app')
 
 @section('content')
 
 <div class="p-6 max-w-xl">
 
-    <h1 class="text-2xl font-bold mb-6">Tambah Anggota</h1>
+    <h1 class="text-2xl font-bold mb-6">Tambah Petugas</h1>
 
-    <form action="{{ route('petugas.anggota.store') }}" method="POST" class="space-y-4">
+    <form action="{{ route('kepala.petugas.store') }}" method="POST" class="space-y-4">
         @csrf
 
         <div>
@@ -39,7 +39,7 @@
                 Simpan
             </button>
 
-            <a href="{{ route('petugas.anggota.index') }}"
+            <a href="{{ route('kepala.petugas.index') }}"
                 class="bg-gray-400 text-white px-4 py-2 rounded">
                 Kembali
             </a>

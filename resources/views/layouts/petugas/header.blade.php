@@ -1,6 +1,6 @@
 <div class="bg-white shadow p-4 flex justify-between items-center">
 
-    <h1 class="font-semibold">Dashboard</h1>
+    <h1 class="font-semibold"></h1>
 
     <div class="flex items-center gap-2">
         <span>Petugas</span>

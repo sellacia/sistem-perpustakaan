@@ -30,7 +30,7 @@ class AnggotaController extends Controller
             'role' => 'anggota'
         ]);
 
-        return redirect()->route('petugas.anggota')->with('success', 'Anggota berhasil ditambahkan');
+        return redirect()->route('petugas.anggota.index')->with('success', 'Anggota berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -48,7 +48,7 @@ class AnggotaController extends Controller
             'username' => $request->username
         ]);
 
-        return redirect()->route('petugas.anggota')->with('success', 'Data berhasil diupdate');
+        return redirect()->route('petugas.anggota.index')->with('success', 'Data berhasil diupdate');
     }
 
     public function destroy($id)

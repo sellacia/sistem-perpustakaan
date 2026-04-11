@@ -1,57 +1,70 @@
-<div class="p-5">
+<div class="w-64 h-screen text-white flex flex-col
+bg-gradient-to-b from-blue-700 to-blue-500
+fixed top-0 left-0 z-50">
 
-    <!-- Logo / Title -->
-    <h2 class="text-xl font-bold mb-8">Perpustakaan Digital</h2>
+    <!-- LOGO -->
+    <div class="p-5 flex items-center gap-3 border-b border-blue-400">
+        <i class="fas fa-book-open text-2xl"></i>
+        <div>
+            <h1 class="font-bold leading-4">Perpustakaan</h1>
+            <span class="text-sm">Digital</span>
+        </div>
+    </div>
 
-    <!-- Menu -->
-    <ul class="space-y-3 text-sm">
+    <!-- MENU -->
+    <ul class="flex-1 p-4 space-y-2 text-sm overflow-y-auto">
 
         <!-- Dashboard -->
-        <a href="/anggota/dashboard"
-            class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('dashboard') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
-            <i data-lucide="home" class="w-5 h-5"></i> <span>Dashboard</span>
-        </a>
+        <li>
+            <a href="/anggota/dashboard"
+                class="flex items-center gap-3 p-3 rounded-lg transition text-white
+                {{ request()->is('anggota/dashboard') ? 'bg-blue-800 shadow-md' : 'hover:bg-blue-600' }}">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+        </li>
 
         <!-- Buku -->
-        <a href="/anggota/buku"
-            class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('anggota/buku*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
-            <i data-lucide="book-open" class="w-5 h-5"></i>
-            <span>Buku</span>
-        </a>
+        <li>
+            <a href="/anggota/buku"
+                class="flex items-center gap-3 p-3 rounded-lg transition text-white
+                {{ request()->is('anggota/buku*') ? 'bg-blue-800 shadow-md' : 'hover:bg-blue-600' }}">
+                <i class="fas fa-book"></i>
+                Buku
+            </a>
+        </li>
 
-        <!-- Riwayat Peminjaman -->
-        <a href="/anggota/riwayat"
-            class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('anggota/riwayat*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
-            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-            <span>Riwayat Peminjaman</span>
-        </a>
+        <!-- Riwayat -->
+        <li>
+            <a href="/anggota/riwayat"
+                class="flex items-center gap-3 p-3 rounded-lg transition text-white
+                {{ request()->is('anggota/riwayat*') ? 'bg-blue-800 shadow-md' : 'hover:bg-blue-600' }}">
+                <i class="fas fa-history"></i>
+                Riwayat Peminjaman
+            </a>
+        </li>
 
         <!-- Pengembalian -->
-        <a href="/anggota/pengembalian"
-            class="flex items-center gap-3 p-3 rounded-xl transition
-       {{ request()->is('anggota/pengembalian*') ? 'bg-white text-blue-600' : 'text-white hover:bg-blue-500' }}">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-            <span>Pengembalian</span>
-        </a>
+        <li>
+            <a href="/anggota/pengembalian"
+                class="flex items-center gap-3 p-3 rounded-lg transition text-white
+                {{ request()->is('anggota/pengembalian*') ? 'bg-blue-800 shadow-md' : 'hover:bg-blue-600' }}">
+                <i class="fas fa-undo"></i>
+                Pengembalian
+            </a>
+        </li>
 
-        <!-- Logout -->
-        <button onclick="alert('klik'); openLogoutModal()"
-            class="flex items-center gap-3 p-3 w-full text-left text-white hover:bg-red-500 rounded-xl">
+    </ul>
 
-            <i data-lucide="log-out" class="w-5 h-5"></i>
-            <span>Logout</span>
-        </button>
-        <script>
-            function openLogoutModal() {
-                document.getElementById('logoutModal').classList.remove('hidden');
-            }
-
-            function closeLogoutModal() {
-                document.getElementById('logoutModal').classList.add('hidden');
-            }
-        </script>
+    <!-- LOGOUT -->
+    <div class="p-4 border-t border-blue-400">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-500">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </form>
+    </div>
 
 </div>

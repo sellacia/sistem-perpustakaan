@@ -16,7 +16,7 @@ fixed top-0 left-0 z-50">
 
         <!-- Dashboard -->
         <li>
-            <a href="/petugas/dashboard"
+            <a href="{{ route('petugas.dashboard') }}"
                 class="flex items-center gap-3 p-3 rounded-lg transition
                 {{ request()->is('petugas/dashboard') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-home"></i>
@@ -26,7 +26,7 @@ fixed top-0 left-0 z-50">
 
         <!-- Kelola Buku -->
         <li>
-            <a href="/petugas/buku"
+            <a href="{{ route('petugas.buku.index') }}"
                 class="flex items-center gap-3 p-3 rounded-lg transition
                 {{ request()->is('petugas/buku*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-book"></i>
@@ -76,7 +76,7 @@ fixed top-0 left-0 z-50">
 
         <!-- Data Anggota -->
         <li>
-            <a href="/petugas/anggota"
+            <a href="{{ route('petugas.anggota.index') }}"
                 class="flex items-center gap-3 p-3 rounded-lg transition
         {{ request()->is('petugas/anggota*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
                 <i class="fas fa-users"></i>

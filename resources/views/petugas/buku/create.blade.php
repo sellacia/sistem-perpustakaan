@@ -72,7 +72,7 @@
 
         <!-- BUTTON -->
         <div class="flex justify-end gap-3">
-            <a href="/petugas/buku"
+            <a href="{{ route('petugas.buku.index') }}"
                 class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
                 Batal
             </a>

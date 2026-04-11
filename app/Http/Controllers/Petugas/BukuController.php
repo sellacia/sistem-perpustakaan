@@ -11,12 +11,12 @@ class BukuController extends Controller
     public function index()
     {
         $buku = Buku::latest()->get();
-        return view('petugas.dashboard.buku.index', compact('buku'));
+        return view('petugas.buku.index', compact('buku'));
     }
 
     public function create()
     {
-        return view('petugas.dashboard.buku.create');
+        return view('petugas.buku.create');
     }
 
     public function store(Request $request)
@@ -47,7 +47,7 @@ class BukuController extends Controller
     public function edit($id)
     {
         $buku = Buku::findOrFail($id);
-        return view('petugas.dashboard.buku.edit', compact('buku'));
+        return view('petugas.buku.edit', compact('buku'));
     }
 
     public function update(Request $request, $id)
@@ -80,7 +80,7 @@ class BukuController extends Controller
     public function show($id)
     {
         $buku = Buku::findOrFail($id);
-        return view('petugas.dashboard.buku.detail', compact('buku'));
+        return view('petugas.buku.detail', compact('buku'));
     }
 
     public function destroy($id)

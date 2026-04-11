@@ -71,7 +71,7 @@
 
     <!-- BUTTON -->
     <div class="flex justify-end gap-3">
-        <a href="/petugas/buku" class="px-4 py-2 bg-gray-300 rounded">Batal</a>
+        <a href="{{ route('petugas.buku.index') }}" class="px-4 py-2 bg-gray-300 rounded">Batal</a>
         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">
             Simpan Perubahan
         </button>

@@ -1,4 +1,4 @@
-@extends('layouts.petugas.app')
+@extends('layouts.kepala.app')
 
 @section('content')
 
@@ -39,7 +39,7 @@
 
         <!-- BUTTON -->
         <div class="mt-6 text-right">
-            <a href="/petugas/buku"
+            <a href="/kepala/buku"
                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                Kembali
             </a>
