@@ -24,8 +24,9 @@
                     <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col">
 
                         <!-- COVER -->
-                        <img src="{{ $item->cover ?? 'https://via.placeholder.com/150' }}"
-                            class="h-52 w-full object-cover rounded-xl mb-4">
+                        <div class="w-full aspect-[3/4] overflow-hidden rounded-xl mb-4">
+                            <img src="{{ $item->cover ? asset('assets/images/' . $item->cover) : 'https://via.placeholder.com/300x500' }}" class="w-full h-full object-cover">
+                        </div>
 
                         <!-- INFO -->
                         <h3 class="text-blue-600 font-semibold text-base mb-2">

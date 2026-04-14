@@ -35,7 +35,7 @@
                         @forelse($laporan as $i => $data)
                             <tr class="border-t">
                                 <td class="p-3">{{ $i + 1 }}</td>
-                                <td>{{ $data->user->name }}</td>
+                                <td>{{ $data->anggota->name ?? '-' }}</td>
                                 <td>{{ $data->buku->judul }}</td>
                                 <td>{{ $data->tanggal_pinjam }}</td>
                                 <td>{{ $data->tanggal_kembali ?? '-' }}</td>

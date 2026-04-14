@@ -13,87 +13,107 @@
             <p class="text-gray-500 mt-1">Kamu tidak memiliki buku pinjaman yang belum dikembalikan.</p>
         </div>
     @else
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            @foreach ($pinjam as $item)
-                @php
-                    $wajib = \Carbon\Carbon::parse($item->tanggal_wajib_kembali);
-                    $hariIni = \Carbon\Carbon::today();
-                    $terlambat = $hariIni->gt($wajib) ? $hariIni->diffInDays($wajib) : 0;
-                    $denda = $terlambat * 2000;
-                @endphp
 
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden">
-                    
-                    @if($terlambat > 0)
-                        <!-- Indikator Keterlambatan -->
-                        <div class="absolute top-0 right-0 bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-bl-xl border-b border-l border-red-200">
-                            Terlambat {{ $terlambat }} Hari
-                        </div>
-                    @endif
+    <!-- GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
-                    <div class="flex gap-4">
-                        <img src="{{ asset('storage/' . $item->buku->gambar) }}" class="w-24 h-36 object-cover rounded-lg shadow-sm border border-gray-200" alt="Buku">
-                        <div class="flex-1 space-y-2">
-                            <h3 class="text-lg font-bold text-gray-800 leading-tight">{{ $item->buku->judul }}</h3>
-                            <p class="text-sm text-gray-600"><span class="font-medium">Pinjam:</span> {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M Y') }}</p>
-                            <p class="text-sm text-gray-600"><span class="font-medium">Wajib Kembali:</span> <span class="{{ $terlambat > 0 ? 'text-red-600 font-bold' : '' }}">{{ $wajib->format('d M Y') }}</span></p>
+        @foreach ($pinjam as $item)
+            @php
+                $wajib = \Carbon\Carbon::parse($item->tanggal_wajib_kembali);
+                $hariIni = \Carbon\Carbon::today();
+                $terlambat = $hariIni->gt($wajib) ? $hariIni->diffInDays($wajib) : 0;
+                $denda = $terlambat * 2000;
+            @endphp
 
-                            @if($denda > 0)
-                                <div class="mt-2 bg-yellow-50 px-3 py-1.5 rounded text-sm text-yellow-800 border border-yellow-200 inline-block font-semibold">
-                                    Denda: Rp {{ number_format($denda, 0, ',', '.') }}
-                                </div>
-                            @endif
-                        </div>
+            <!-- CARD -->
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow transition relative text-sm">
+
+                @if ($terlambat > 0)
+                    <div class="absolute top-0 right-0 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-bl-lg">
+                        Terlambat {{ $terlambat }} Hari
+                    </div>
+                @endif
+
+                <!-- FLEX -->
+                <div class="flex items-center gap-3">
+
+                    <!-- COVER (LEBIH KECIL) -->
+                    <div class="w-12 h-16 overflow-hidden rounded border flex-shrink-0">
+                        <img src="{{ asset('assets/images/' . $item->buku->cover) }}"
+                            class="w-full h-full object-cover">
                     </div>
 
-                    <div class="mt-5 flex justify-end">
-                        <form action="{{ route('anggota.pengembalian.proses') }}" method="POST" class="form-kembali">
-                            @csrf
-                            <input type="hidden" name="pinjam_id" value="{{ $item->id }}">
-                            <button type="button" class="btn-kembali bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm w-full transition shadow-sm border border-blue-600 focus:ring focus:ring-blue-200 flex items-center justify-center gap-2">
-                                <i data-lucide="corner-down-left" class="w-4 h-4"></i> Kembalikan Buku
-                            </button>
-                        </form>
+                    <!-- TEXT -->
+                    <div class="flex-1">
+                        <h3 class="text-xs font-semibold text-gray-800 leading-tight">
+                            {{ $item->buku->judul }}
+                        </h3>
+
+                        <p class="text-[11px] text-gray-500">
+                            {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M') }}
+                            •
+                            <span class="{{ $terlambat > 0 ? 'text-red-600 font-semibold' : '' }}">
+                                {{ $wajib->format('d M') }}
+                            </span>
+                        </p>
+
+                        @if ($denda > 0)
+                            <p class="text-[10px] text-yellow-700">
+                                Rp {{ number_format($denda, 0, ',', '.') }}
+                            </p>
+                        @endif
                     </div>
+
                 </div>
-            @endforeach
-        </div>
+
+                <!-- BUTTON -->
+                <div class="mt-3">
+                    <form action="{{ route('anggota.pengembalian.proses') }}" method="POST" class="form-kembali">
+                        @csrf
+                        <input type="hidden" name="pinjam_id" value="{{ $item->id }}">
+                        <button type="button"
+                            class="btn-kembali w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-md text-xs flex items-center justify-center gap-1">
+                            <i data-lucide="corner-down-left" class="w-3 h-3"></i>
+                            Kembalikan
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        @endforeach
+
+    </div>
+
     @endif
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const kembaliButtons = document.querySelectorAll('.btn-kembali');
-        kembaliButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('.form-kembali');
-                
-                Swal.fire({
-                    title: 'Kembalikan Buku?',
-                    text: 'Pastikan kondisi fisik buku masih sama baiknya seperti saat Anda meminjamnya.',
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Kembalikan',
-                    cancelButtonText: 'Batal',
-                    background: '#ffffff',
-                    color: '#1f2937', 
-                    confirmButtonColor: '#2563eb', 
-                    cancelButtonColor: '#9ca3af',
-                    customClass: {
-                        popup: 'rounded-2xl border border-gray-100 shadow-xl',
-                        title: 'text-xl font-bold text-gray-800',
-                        confirmButton: 'rounded-lg px-6 py-2 font-semibold',
-                        cancelButton: 'rounded-lg px-6 py-2 font-semibold'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
+document.addEventListener("DOMContentLoaded", function() {
+    const kembaliButtons = document.querySelectorAll('.btn-kembali');
+
+    kembaliButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('.form-kembali');
+
+            Swal.fire({
+                title: 'Kembalikan Buku?',
+                text: 'Pastikan kondisi fisik buku masih sama baiknya seperti saat Anda meminjamnya.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Kembalikan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#9ca3af'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
             });
         });
     });
+});
 </script>
 @endsection

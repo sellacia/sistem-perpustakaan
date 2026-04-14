@@ -9,6 +9,12 @@
     </h2>
 
     <div class="bg-white p-6 rounded-xl shadow">
+        <div class="w-full aspect-[3/4] overflow-hidden rounded-xl mb-4">
+    <img src="{{ $item->gambar
+        ? asset('storage/' . $item->gambar)
+        : 'https://via.placeholder.com/300x400' }}"
+        class="w-full h-full object-cover">
+</div>
 
         <!-- ✅ FIX ROUTE -->
         <form action="{{ route('anggota.pinjam', $buku->id) }}" method="POST">

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\Buku;
-use App\Models\Denda;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +15,7 @@ class PengembalianController extends Controller
     {
         $pinjam = Peminjaman::with('buku')
             ->where('anggota_id', Auth::id())
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])  // Include terlambat juga
             ->get();
 
         return view('anggota.pengembalian.index', compact('pinjam'));
@@ -30,7 +29,7 @@ class PengembalianController extends Controller
 
         $pinjam = Peminjaman::where('anggota_id', Auth::id())->findOrFail($request->pinjam_id);
 
-        if ($pinjam->status != 'dipinjam') {
+        if (!in_array($pinjam->status, ['dipinjam', 'terlambat'])) {
             return back()->with('error', 'Sudah dikembalikan atau status tidak valid!');
         }
 
@@ -42,15 +41,17 @@ class PengembalianController extends Controller
 
         if ($kembali->gt($batas)) {
             $terlambat = $kembali->diffInDays($batas);
-            $denda = $terlambat * 2000;
+            $denda = $terlambat * 2000;  // Ubah dari 1000 menjadi 2000 agar konsisten
 
             if ($denda > 0) {
-                \App\Models\Denda::create([
-                    'peminjaman_id' => $pinjam->id,
-                    'terlambat' => $terlambat,
-                    'jumlah_denda' => $denda,
-                    'status' => 'belum_bayar'
-                ]);
+                \App\Models\Denda::updateOrCreate(
+                    ['peminjaman_id' => $pinjam->id],
+                    [
+                        'terlambat' => $terlambat,
+                        'jumlah_denda' => $denda,
+                        'status' => 'belum_bayar'
+                    ]
+                );
             }
         }
 

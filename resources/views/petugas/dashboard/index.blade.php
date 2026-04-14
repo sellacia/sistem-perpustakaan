@@ -63,7 +63,7 @@
     </div>
 
     <div class="border-2 border-gray-200 rounded-2xl p-4 bg-white shadow">
-        <h3 class="text-lg font-bold text-blue-600 mb-4">📊 Peminjaman Terbaru</h3>
+        <h3 class="text-lg font-bold text-blue-600 mb-4"> Peminjaman Terbaru</h3>
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -87,7 +87,7 @@
                     @forelse ($data as $item)
                         <tr class="border-t hover:bg-gray-50">
                             <td class="p-3">{{ $loop->iteration }}</td>
-                            <td class="p-3">{{ $item->user->name }}</td>
+                            <td class="p-3">{{ $item->user->name ?? '-' }}</td>
                             <td class="p-3">{{ $item->buku->judul }}</td>
                             <td class="p-3">{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d-m-Y') }}</td>
                             <td class="p-3">{{ $item->buku->kode_buku ?? '-' }}</td>

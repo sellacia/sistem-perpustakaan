@@ -15,13 +15,17 @@ class PeminjamanController extends Controller
         $today = Carbon::today();
 
         // Otomatis cek peminjaman yang telat di seluruh sistem
-        $peminjamanTelat = Peminjaman::where('status', 'dipinjam')
+        $peminjamanTelat = Peminjaman::where(function($query) {
+                $query->where('status', 'dipinjam')
+                      ->orWhere('status', 'terlambat')
+                      ->orWhere('status', 'menunggu');  // tambah menunggu untuk coverage lebih baik
+            })
             ->where('tanggal_wajib_kembali', '<', $today)
             ->get();
 
         foreach ($peminjamanTelat as $pinjam) {
             $pinjam->update(['status' => 'terlambat']);
-            
+
             $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
             $terlambat = $today->diffInDays($batas);
 
@@ -84,6 +88,11 @@ class PeminjamanController extends Controller
     {
         $pinjam = Peminjaman::findOrFail($id);
 
+        // Pastikan statusnya dipinjam atau terlambat saja yang bisa dikembalikan
+        if (!in_array($pinjam->status, ['dipinjam', 'terlambat'])) {
+            return back()->with('error', 'Status peminjaman tidak valid untuk pengembalian!');
+        }
+
         $today = Carbon::today();
         $wajib = Carbon::parse($pinjam->tanggal_wajib_kembali);
 
@@ -110,12 +119,14 @@ class PeminjamanController extends Controller
 
         // simpan ke tabel DENDA (kalau ada)
         if ($denda > 0) {
-            Denda::create([
-                'peminjaman_id' => $pinjam->id,
-                'terlambat' => $terlambat,
-                'jumlah_denda' => $denda,
-                'status' => 'belum_bayar'
-            ]);
+            Denda::updateOrCreate(
+                ['peminjaman_id' => $pinjam->id],
+                [
+                    'terlambat' => $terlambat,
+                    'jumlah_denda' => $denda,
+                    'status' => 'belum_bayar'
+                ]
+            );
         }
 
         return back()->with('success', 'Buku berhasil dikembalikan!');

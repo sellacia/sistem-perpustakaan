@@ -30,14 +30,13 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // CEK LOGIN
-        if (Auth::attempt([
-            'username' => $request->username,
-            'password' => $request->password
-        ])) {
+        // CEK LOGIN - Cari user berdasarkan username
+        $user = User::where('username', $request->username)->first();
 
+        // Verifikasi password
+        if ($user && Hash::check($request->password, $user->password)) {
+            Auth::login($user);
             $request->session()->regenerate();
-            $user = Auth::user();
 
             //  REDIRECT SESUAI ROLE
             if ($user->role == 'petugas') {

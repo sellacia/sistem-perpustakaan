@@ -38,7 +38,7 @@
                         <tr class="hover:bg-gray-50 transition">
 
                             <td class="px-4 py-3">
-                                {{ $d->user->name }}
+                               {{ $d->anggota->name ?? '-' }}
                             </td>
 
                             <td class="px-4 py-3">
@@ -56,18 +56,33 @@
                             <td class="px-4 py-3 text-center">
                                 @if ($d->status == 'dikembalikan')
                                     <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Dikembalikan
+                                    </span>
+                                @elseif ($d->status == 'selesai')
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
                                         Selesai
                                     </span>
+                                @elseif ($d->status == 'terlambat')
+                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Terlambat
+                                    </span>
+                                @elseif ($d->status == 'menunggu')
+                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Menunggu
+                                    </span>
                                 @else
-                                    <span
-                                        class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Dipinjam
+                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        {{ ucfirst($d->status) }}
                                     </span>
                                 @endif
                             </td>
 
                             <td class="px-4 py-3 font-semibold">
-                                Rp {{ number_format($d->denda->jumlah_denda ?? 0, 0, ',', '.') }}
+                                @if ($d->denda && $d->denda->jumlah_denda)
+                                    Rp {{ number_format($d->denda->jumlah_denda, 0, ',', '.') }}
+                                @else
+                                    -
+                                @endif
                             </td>
 
                         </tr>
@@ -84,4 +99,5 @@
         </div>
 
     </div>
+
 @endsection

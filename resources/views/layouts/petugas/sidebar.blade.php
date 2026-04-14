@@ -88,10 +88,13 @@ fixed top-0 left-0 z-50">
 
     <!-- LOGOUT -->
     <div class="p-4 border-t border-blue-400">
-        <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
+        <form method="POST" action="{{ route('petugas.logout') }}" class="w-full">
+            @csrf
+            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600 text-left text-white">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </form>
     </div>
 
 </div>

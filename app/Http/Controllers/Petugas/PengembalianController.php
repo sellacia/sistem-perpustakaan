@@ -11,8 +11,8 @@ class PengembalianController extends Controller
     // tampilkan data pengembalian
     public function index()
     {
-        $pinjam = \App\Models\Peminjaman::with('buku')
-            ->where('status', 'dikembalikan')
+        $pinjam = \App\Models\Peminjaman::with('buku', 'anggota')
+            ->whereIn('status', ['dikembalikan', 'terlambat'])  // Include terlambat juga
             ->latest()
             ->get();
 

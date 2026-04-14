@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DebugController;
 
 // ===== ANGGOTA =====
 use App\Http\Controllers\Anggota\DashboardController as DashboardAnggotaController;
@@ -41,7 +42,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth')->group(function () {
 
     // ================= ANGGOTA =================
-    Route::prefix('anggota')->group(function () {
+    Route::prefix('anggota')->middleware('role:anggota')->group(function () {
 
         Route::get('/dashboard', [DashboardAnggotaController::class, 'index'])->name('anggota.dashboard');
         Route::post('/logout', [DashboardAnggotaController::class, 'logout'])->name('anggota.logout');
@@ -64,9 +65,10 @@ Route::middleware('auth')->group(function () {
 
 
     // ================= PETUGAS =================
-    Route::prefix('petugas')->group(function () {
+    Route::prefix('petugas')->middleware('role:petugas')->group(function () {
 
         Route::get('/dashboard', [DashboardPetugasController::class, 'index'])->name('petugas.dashboard');
+        Route::post('/logout', [DashboardPetugasController::class, 'logout'])->name('petugas.logout');
 
         Route::resource('buku', BukuPetugasController::class)->names([
             'index' => 'petugas.buku.index',
@@ -92,7 +94,7 @@ Route::middleware('auth')->group(function () {
 
         //  DENDA PETUGAS
         Route::get('/denda', [PetugasDendaController::class, 'index'])->name('petugas.denda');
-        Route::get('/denda/bayar/{id}', [PetugasDendaController::class, 'bayar'])->name('petugas.denda.bayar');
+        Route::post('/denda/bayar/{id}', [PetugasDendaController::class, 'bayar'])->name('petugas.denda.bayar');
 
         //  LAPORAN PETUGAS
         Route::get('/laporan', [LaporanController::class, 'index'])
@@ -112,8 +114,15 @@ Route::middleware('auth')->group(function () {
 
 
     // ================= KEPALA =================
-    Route::prefix('kepala')->group(function () {
+    Route::prefix('kepala')->middleware('role:kepala')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('kepala.dashboard');
+
+        Route::get('/buku', [BukuController::class, 'index'])->name('kepala.buku.index');
+        Route::get('/buku/{id}', [BukuController::class, 'show'])->name('kepala.buku.show');
+
+        // LAPORAN
+        Route::get('/laporan', [LaporanKepalaController::class, 'index'])->name('kepala.laporan');
+        Route::get('/laporan/export-pdf', [LaporanKepalaController::class, 'exportPdf'])->name('kepala.laporan.export-pdf');
 
         Route::get('/petugas', [PetugasController::class, 'index'])->name('kepala.petugas.index');
 
@@ -128,25 +137,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('kepala.petugas.destroy');
     });
 
-    //  DATA BUKU KEPALA
-    Route::prefix('kepala')->middleware(['auth', 'role:kepala'])->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('kepala.dashboard');
-
-        Route::get('/buku', [BukuController::class, 'index'])->name('kepala.buku');
-        Route::get('/buku/{id}', [BukuController::class, 'show'])->name('kepala.buku.detail');
-
-        Route::get('/laporan', [LaporanKepalaController::class, 'index'])->name('kepala.laporan');
-        Route::get('/laporan/export-pdf', [LaporanKepalaController::class, 'exportPdf'])->name('kepala.laporan.export-pdf');
-    });
-
-    // DATA PETUGAS
-    Route::prefix('kepala')->middleware(['auth', 'role:kepala'])->group(function () {
-
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('kepala.dashboard');
-
-        Route::get('/petugas', [PetugasController::class, 'index'])->name('kepala.petugas.index');
-    });
 
 
     // ================= LOGOUT =================
@@ -154,4 +145,7 @@ Route::middleware('auth')->group(function () {
         Auth::logout();
         return redirect('/login');
     })->name('logout');
+
+    // ================= DEBUG =================
+    Route::get('/debug/denda', [DebugController::class, 'dendaDebug'])->middleware('role:petugas,kepala');
 });

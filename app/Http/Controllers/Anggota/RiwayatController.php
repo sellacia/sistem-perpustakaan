@@ -25,7 +25,7 @@ class RiwayatController extends Controller
             if ($today->gt($batas)) {
                 // Update status ke terlambat
                 $pinjam->update(['status' => 'terlambat']);
-                
+
                 // Cek apakah data denda sudah ada
                 $dendaExist = Denda::where('peminjaman_id', $pinjam->id)->exists();
                 if (!$dendaExist) {
@@ -40,10 +40,10 @@ class RiwayatController extends Controller
             }
         }
 
-        // Ambil SEMUA riwayat peminjaman user ini
+        // Ambil SEMUA riwayat peminjaman user ini (exclude yang sudah selesai)
         $data = Peminjaman::with(['buku', 'denda'])
             ->where('anggota_id', $userId)
-            ->whereIn('status', ['dipinjam', 'dikembalikan', 'selesai', 'terlambat', 'ditolak'])
+            ->whereIn('status', ['dipinjam', 'dikembalikan', 'terlambat', 'ditolak', 'menunggu'])
             ->latest()
             ->get();
 

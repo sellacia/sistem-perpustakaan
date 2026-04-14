@@ -2,6 +2,18 @@
 
 @section('content')
 <div class="p-6">
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+            ❌ {{ session('error') }}
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-blue-700 tracking-tight">Manajemen Denda</h2>
     </div>
@@ -49,8 +61,9 @@
                         </td>
                         <td class="py-4 px-6">
                             @if ($d->status == 'belum_bayar')
-                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="GET" class="form-konfirmasi">
-                                    <button type="button" class="btn-konfirmasi bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition shadow-sm">
+                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Konfirmasi pembayaran denda ini?')">
+                                    @csrf
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition shadow-sm">
                                         Konfirmasi Lunas
                                     </button>
                                 </form>
@@ -74,32 +87,4 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const konfirmButtons = document.querySelectorAll('.btn-konfirmasi');
-        konfirmButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('.form-konfirmasi');
-                
-                Swal.fire({
-                    title: 'Konfirmasi Pembayaran?',
-                    text: 'Pastikan anggota benar-benar telah menyerahkan uang denda!',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Sudah Bayar',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#16a34a', 
-                    cancelButtonColor: '#6b7280',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            });
-        });
-    });
-</script>
 @endsection
