@@ -99,6 +99,8 @@ Route::middleware('auth')->group(function () {
         //  LAPORAN PETUGAS
         Route::get('/laporan', [LaporanController::class, 'index'])
             ->name('petugas.laporan');
+        Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])
+            ->name('petugas.laporan.export-pdf');
 
         // ANGGOTA PETUGAS
         Route::resource('anggota', AnggotaController::class)->names([

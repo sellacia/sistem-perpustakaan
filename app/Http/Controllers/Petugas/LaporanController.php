@@ -7,25 +7,21 @@ use Illuminate\Http\Request;
 use App\Models\Peminjaman;
 use App\Models\Denda;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        // Generate denda otomatis sebelum menampilkan laporan
         $this->generateDenda();
 
-        $mulai = $request->mulai;
+        $mulai  = $request->mulai;
         $sampai = $request->sampai;
 
-        // Query dengan refresh relasi denda - ambil SEMUA peminjaman, tidak cuma yang dipinjam
-        $data = Peminjaman::with(['anggota', 'buku', 'denda' => function($query) {
-                $query->select('id', 'peminjaman_id', 'terlambat', 'jumlah_denda', 'status');
-            }])
-            ->when($mulai && $sampai, function ($query) use ($mulai, $sampai) {
-                return $query->whereBetween('tanggal_pinjam', [$mulai, $sampai]);
+        $data = Peminjaman::with(['anggota', 'buku', 'dendaData'])
+            ->when($mulai && $sampai, function ($q) use ($mulai, $sampai) {
+                $q->whereBetween('tanggal_pinjam', [$mulai, $sampai]);
             })
-            // Ambil yang belum selesai atau yang sudah dikembalikan/selesai
             ->whereIn('status', ['dipinjam', 'dikembalikan', 'selesai', 'terlambat', 'menunggu'])
             ->orderByDesc('tanggal_pinjam')
             ->get();
@@ -33,52 +29,71 @@ class LaporanController extends Controller
         return view('petugas.laporan.index', compact('data'));
     }
 
+    public function exportPdf(Request $request)
+    {
+        $this->generateDenda();
+
+        $mulai  = $request->mulai;
+        $sampai = $request->sampai;
+
+        $data = Peminjaman::with(['anggota', 'buku', 'dendaData'])
+            ->when($mulai && $sampai, function ($q) use ($mulai, $sampai) {
+                $q->whereBetween('tanggal_pinjam', [$mulai, $sampai]);
+            })
+            ->whereIn('status', ['dipinjam', 'dikembalikan', 'selesai', 'terlambat', 'menunggu'])
+            ->orderByDesc('tanggal_pinjam')
+            ->get();
+
+        $pdf = Pdf::loadView('petugas.laporan.cetak', compact('data'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-peminjaman-' . now()->format('d-m-Y') . '.pdf');
+    }
+
     private function generateDenda()
     {
-        // BELUM DIKEMBALIKAN TAPI SUDAH LEWAT DEADLINE
-        $peminjamanBelumKembali = Peminjaman::where(function($query) {
-                $query->where('status', 'dipinjam')
-                      ->orWhere('status', 'terlambat')
-                      ->orWhere('status', 'menunggu');  // tambah untuk coverage lebih baik
-            })
-            ->where('tanggal_wajib_kembali', '<', Carbon::today())
+        $today = Carbon::today();
+
+        $belumKembali = Peminjaman::whereIn('status', ['dipinjam', 'terlambat', 'menunggu'])
+            ->where('tanggal_wajib_kembali', '<', $today)
             ->whereNull('tanggal_kembali')
             ->get();
 
-        // DIKEMBALIKAN TAPI TERLAMBAT (tanggal_kembali > tanggal_wajib_kembali)
-        $peminjamanKembaliTelat = Peminjaman::whereColumn('tanggal_kembali', '>', 'tanggal_wajib_kembali')
+        $kembaliTelat = Peminjaman::whereColumn('tanggal_kembali', '>', 'tanggal_wajib_kembali')
             ->whereNotNull('tanggal_kembali')
             ->get();
 
-        $peminjamanTelat = $peminjamanBelumKembali->merge($peminjamanKembaliTelat);
+        $semua = $belumKembali->merge($kembaliTelat);
 
-        foreach ($peminjamanTelat as $pinjam) {
-            // Update status jika belum terlambat
-            if ($pinjam->status != 'terlambat') {
+        foreach ($semua as $pinjam) {
+            if ($pinjam->status !== 'terlambat') {
                 $pinjam->update(['status' => 'terlambat']);
             }
 
-            // Hitung hari terlambat
             $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
 
-            // Jika sudah dikembalikan, hitung sampai tanggal kembali
             if ($pinjam->tanggal_kembali) {
-                $kembali = Carbon::parse($pinjam->tanggal_kembali);
-                $terlambat = $batas->diffInDays($kembali);
+                $terlambat = (int) $batas->diffInDays(Carbon::parse($pinjam->tanggal_kembali));
             } else {
-                // Jika belum dikembalikan, hitung sampai hari ini
-                $terlambat = $batas->diffInDays(Carbon::today());
+                $terlambat = (int) $batas->diffInDays($today);
             }
+
+            if ($terlambat <= 0) continue;
+
+            // Sync ke kolom di tabel peminjaman
+            $pinjam->update([
+                'terlambat' => $terlambat,
+                'denda' => $terlambat * 2000
+            ]);
 
             Denda::updateOrCreate(
                 ['peminjaman_id' => $pinjam->id],
                 [
-                    'terlambat' => $terlambat,
+                    'terlambat'    => $terlambat,
                     'jumlah_denda' => $terlambat * 2000,
-                    'status' => 'belum_bayar'
+                    'status'       => 'belum_bayar',
                 ]
             );
         }
     }
 }
-

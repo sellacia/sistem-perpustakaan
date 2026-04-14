@@ -23,25 +23,24 @@ class RiwayatController extends Controller
         foreach ($peminjamanDipinjam as $pinjam) {
             $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
             if ($today->gt($batas)) {
-                // Update status ke terlambat
                 $pinjam->update(['status' => 'terlambat']);
 
-                // Cek apakah data denda sudah ada
-                $dendaExist = Denda::where('peminjaman_id', $pinjam->id)->exists();
-                if (!$dendaExist) {
-                    $terlambat = $today->diffInDays($batas);
-                    Denda::create([
-                        'peminjaman_id' => $pinjam->id,
-                        'terlambat' => $terlambat,
-                        'jumlah_denda' => $terlambat * 2000,
-                        'status' => 'belum_bayar'
-                    ]);
+                $terlambat = (int) $batas->diffInDays($today);
+                if ($terlambat > 0) {
+                    Denda::updateOrCreate(
+                        ['peminjaman_id' => $pinjam->id],
+                        [
+                            'terlambat'    => $terlambat,
+                            'jumlah_denda' => $terlambat * 2000,
+                            'status'       => 'belum_bayar',
+                        ]
+                    );
                 }
             }
         }
 
         // Ambil SEMUA riwayat peminjaman user ini (exclude yang sudah selesai)
-        $data = Peminjaman::with(['buku', 'denda'])
+        $data = Peminjaman::with(['buku', 'dendaData'])
             ->where('anggota_id', $userId)
             ->whereIn('status', ['dipinjam', 'dikembalikan', 'terlambat', 'ditolak', 'menunggu'])
             ->latest()

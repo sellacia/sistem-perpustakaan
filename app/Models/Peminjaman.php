@@ -37,8 +37,10 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Buku::class, 'buku_id');
     }
-    public function denda()
+    // PENTING: Relasi ini diberi nama dendaData (bukan denda)
+    // karena tabel peminjaman punya kolom 'denda' yang akan override relasi jika namanya sama
+    public function dendaData()
     {
-        return $this->hasOne(\App\Models\Denda::class);
+        return $this->hasOne(\App\Models\Denda::class, 'peminjaman_id', 'id');
     }
 }

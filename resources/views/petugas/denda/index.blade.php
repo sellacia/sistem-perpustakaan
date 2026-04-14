@@ -1,84 +1,136 @@
 @extends('layouts.petugas.app')
 
 @section('content')
-<div class="p-6">
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
-            ✅ {{ session('success') }}
-        </div>
-    @endif
+<div class="p-6 space-y-6">
 
-    @if(session('error'))
-        <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-            ❌ {{ session('error') }}
-        </div>
-    @endif
-
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-blue-700 tracking-tight">Manajemen Denda</h2>
+    {{-- Header --}}
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Kelola Denda</h1>
+        <p class="text-sm text-gray-500 mt-1">Manajemen denda keterlambatan pengembalian buku</p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+    {{-- Alert --}}
+    @if(session('success'))
+    <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
+        <i class="fas fa-check-circle text-green-500 text-base"></i> {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+        <i class="fas fa-exclamation-circle text-red-500 text-base"></i> {{ session('error') }}
+    </div>
+    @endif
+
+    {{-- Stats --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @php
+            $totalBelumBayar = $data->where('status', 'belum_bayar')->sum('jumlah_denda');
+            $totalSudahBayar = $data->where('status', 'sudah_bayar')->sum('jumlah_denda');
+            $countBelum = $data->where('status', 'belum_bayar')->count();
+        @endphp
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fas fa-exclamation text-red-600"></i>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500">Belum Dibayar</p>
+                <p class="font-bold text-lg text-gray-800">{{ $countBelum }} denda</p>
+                <p class="text-xs font-semibold text-red-600">Rp {{ number_format($totalBelumBayar, 0, ',', '.') }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fas fa-check text-green-600"></i>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500">Sudah Dibayar</p>
+                <p class="font-bold text-lg text-gray-800">{{ $data->where('status', 'sudah_bayar')->count() }} denda</p>
+                <p class="text-xs font-semibold text-green-600">Rp {{ number_format($totalSudahBayar, 0, ',', '.') }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fas fa-coins text-blue-600"></i>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500">Total Denda</p>
+                <p class="font-bold text-lg text-gray-800">{{ $data->count() }} denda</p>
+                <p class="text-xs font-semibold text-blue-600">Rp {{ number_format($totalBelumBayar + $totalSudahBayar, 0, ',', '.') }}</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Table --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h2 class="font-semibold text-gray-800">Rincian Denda</h2>
+        </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
-                        <th class="py-4 px-6 font-semibold">Anggota</th>
-                        <th class="py-4 px-6 font-semibold">Buku</th>
-                        <th class="py-4 px-6 font-semibold">Keterangan</th>
-                        <th class="py-4 px-6 font-semibold">Jumlah Denda</th>
-                        <th class="py-4 px-6 font-semibold">Status</th>
-                        <th class="py-4 px-6 font-semibold">Aksi</th>
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+                    <tr>
+                        <th class="px-5 py-3 text-left font-semibold">No</th>
+                        <th class="px-5 py-3 text-left font-semibold">Nama Anggota</th>
+                        <th class="px-5 py-3 text-left font-semibold">Judul Buku</th>
+                        <th class="px-5 py-3 text-center font-semibold">Keterlambatan</th>
+                        <th class="px-5 py-3 text-right font-semibold">Jumlah Denda</th>
+                        <th class="px-5 py-3 text-center font-semibold">Status</th>
+                        <th class="px-5 py-3 text-center font-semibold">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-50">
                     @forelse ($data as $d)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 font-medium text-gray-800">
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-5 py-3 text-gray-500">{{ $loop->iteration }}</td>
+                        <td class="px-5 py-3 font-medium text-gray-800">
                             {{ $d->peminjaman->anggota->name ?? ($d->peminjaman->nama ?? '-') }}
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">
-                            {{ $d->peminjaman->buku->judul ?? '-' }}
+                        <td class="px-5 py-3 text-gray-700 max-w-[180px]">
+                            <div class="truncate" title="{{ $d->peminjaman->buku->judul ?? '-' }}">
+                                {{ $d->peminjaman->buku->judul ?? '-' }}
+                            </div>
                         </td>
-                        <td class="py-4 px-6">
-                            <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
-                                Terlambat {{ $d->terlambat }} Hari
+                        <td class="px-5 py-3 text-center">
+                            <span class="bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                {{ $d->terlambat }} hari
                             </span>
                         </td>
-                        <td class="py-4 px-6 font-bold text-gray-800">
+                        <td class="px-5 py-3 text-right font-bold text-gray-800">
                             Rp {{ number_format($d->jumlah_denda, 0, ',', '.') }}
                         </td>
-                        <td class="py-4 px-6">
+                        <td class="px-5 py-3 text-center">
                             @if ($d->status == 'belum_bayar')
-                                <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                    Belum Bayar
+                                <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Belum Bayar
                                 </span>
                             @else
-                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                    Lunas
+                                <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Lunas
                                 </span>
                             @endif
                         </td>
-                        <td class="py-4 px-6">
+                        <td class="px-5 py-3 text-center">
                             @if ($d->status == 'belum_bayar')
-                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Konfirmasi pembayaran denda ini?')">
+                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Konfirmasi pembayaran denda ini?')">
                                     @csrf
-                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-1.5 rounded-lg text-xs transition shadow-sm">
-                                        Konfirmasi Lunas
+                                    <button type="submit"
+                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                        <i class="fas fa-check mr-1"></i>Konfirmasi Lunas
                                     </button>
                                 </form>
                             @else
-                                <span class="text-gray-400 text-xs italic font-semibold text-green-600">Terbayar Lunas</span>
+                                <span class="text-green-600 text-xs font-semibold">
+                                    <i class="fas fa-check-circle mr-1"></i>Terbayar
+                                </span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="p-12 text-center text-gray-400">
-                            <div class="flex flex-col items-center">
-                                <i data-lucide="info" class="w-12 h-12 mb-2 opacity-20"></i>
-                                <p>Tidak ada data denda yang tercatat.</p>
-                            </div>
+                        <td colspan="7" class="px-5 py-12 text-center text-gray-400">
+                            <i class="fas fa-smile text-4xl mb-3 block opacity-30"></i>
+                            Tidak ada data denda
                         </td>
                     </tr>
                     @endforelse
