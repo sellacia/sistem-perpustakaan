@@ -36,90 +36,81 @@
             class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
     </div>
 
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm" id="bukuTable">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
-                    <tr>
-                        <th class="px-5 py-3 text-left font-semibold">No</th>
-                        <th class="px-5 py-3 text-left font-semibold">Kode Buku</th>
-                        <th class="px-5 py-3 text-left font-semibold">Judul</th>
-                        <th class="px-5 py-3 text-left font-semibold">Pengarang</th>
-                        <th class="px-5 py-3 text-left font-semibold">Penerbit</th>
-                        <th class="px-5 py-3 text-left font-semibold">Tahun</th>
-                        <th class="px-5 py-3 text-center font-semibold">Stok</th>
-                        <th class="px-5 py-3 text-center font-semibold">Status</th>
-                        <th class="px-5 py-3 text-center font-semibold">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50" id="bukuBody">
-                    @forelse ($buku as $item)
-                    <tr class="hover:bg-gray-50 transition-colors buku-row">
-                        <td class="px-5 py-3 text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-5 py-3 font-mono text-xs bg-gray-50 text-gray-700 font-medium">
-                            {{ $item->kode_buku }}
-                        </td>
-                        <td class="px-5 py-3 font-medium text-gray-800 max-w-[200px]">
-                            <div class="truncate" title="{{ $item->judul }}">{{ $item->judul }}</div>
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">{{ $item->pengarang }}</td>
-                        <td class="px-5 py-3 text-gray-600">{{ $item->penerbit }}</td>
-                        <td class="px-5 py-3 text-gray-600">{{ $item->tahun }}</td>
-                        <td class="px-5 py-3 text-center">
-                            <span class="font-bold {{ $item->stok > 0 ? 'text-green-600' : 'text-red-500' }}">
-                                {{ $item->stok }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if ($item->status == 'tersedia')
-                                <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    Tersedia
-                                </span>
-                            @else
-                                <span class="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    Dipinjam
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            <div class="inline-flex items-center gap-2">
-                                <a href="/petugas/buku/{{ $item->id }}"
-                                    class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                                    title="Detail">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="/petugas/buku/{{ $item->id }}/edit"
-                                    class="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 border border-yellow-200 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                                    title="Edit">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                @if(($item->peminjaman_aktif_count ?? 0) > 0 || $item->status === 'dipinjam')
-                                    <span class="bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium cursor-not-allowed"
-                                        title="Buku sedang dipinjam atau diproses, tidak bisa dihapus">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                @else
-                                    <button onclick="bukaModal('{{ $item->id }}', '{{ addslashes($item->judul) }}', '{{ $item->kode_buku }}')"
-                                        class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                                        title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="px-5 py-10 text-center text-gray-400">
-                            <i class="fas fa-book text-4xl mb-3 block opacity-30"></i>
-                            Belum ada data buku
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    {{-- Grid Cards --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="bukuGrid">
+        @forelse ($buku as $item)
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition-all duration-300 buku-card" data-judul="{{ $item->judul }}" data-pengarang="{{ $item->pengarang }}" data-kode="{{ $item->kode_buku }}">
+            {{-- Cover Image --}}
+            <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                @if($item->cover)
+                    <img src="{{ asset('storage/' . $item->cover) }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                @else
+                    <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                        <i class="fas fa-book text-5xl mb-2"></i>
+                        <span class="text-xs">No Cover</span>
+                    </div>
+                @endif
+                
+                {{-- Status Badge --}}
+                <div class="absolute top-3 right-3">
+                    @if ($item->status == 'tersedia')
+                        <span class="bg-green-500/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                            Tersedia
+                        </span>
+                    @else
+                        <span class="bg-amber-500/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                            Dipinjam
+                        </span>
+                    @endif
+                </div>
+
+                {{-- Hover Actions Overlay --}}
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <a href="/petugas/buku/{{ $item->id }}" class="w-9 h-9 bg-white text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-50 transition shadow-lg" title="Detail">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/petugas/buku/{{ $item->id }}/edit" class="w-9 h-9 bg-white text-amber-500 rounded-full flex items-center justify-center hover:bg-amber-50 transition shadow-lg" title="Edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </a>
+                    @if(($item->peminjaman_aktif_count ?? 0) > 0 || $item->status === 'dipinjam')
+                        <span class="w-9 h-9 bg-white/50 text-gray-400 rounded-full flex items-center justify-center cursor-not-allowed shadow-lg" title="Buku sedang dipinjam">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    @else
+                        <button onclick="bukaModal('{{ $item->id }}', '{{ addslashes($item->judul) }}', '{{ $item->kode_buku }}')" class="w-9 h-9 bg-white text-red-500 rounded-full flex items-center justify-center hover:bg-red-50 transition shadow-lg" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Content --}}
+            <div class="p-4 flex flex-col flex-grow">
+                <div class="text-[10px] font-mono text-gray-400 mb-1 uppercase tracking-widest">{{ $item->kode_buku }}</div>
+                <h3 class="font-bold text-gray-800 text-sm line-clamp-2 leading-tight mb-1 min-h-[2.5rem]" title="{{ $item->judul }}">
+                    {{ $item->judul }}
+                </h3>
+                <p class="text-xs text-gray-500 truncate mb-3">{{ $item->pengarang }}</p>
+                
+                <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[11px]">
+                    <div class="text-gray-400">
+                        <i class="far fa-calendar-alt mr-1"></i> {{ $item->tahun }}
+                    </div>
+                    <div class="font-bold {{ $item->stok > 0 ? 'text-blue-600' : 'text-red-500' }}">
+                        Stok: {{ $item->stok }}
+                    </div>
+                </div>
+            </div>
         </div>
+        @empty
+        <div class="col-span-full py-20 text-center text-gray-400">
+            <div class="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-book-open text-3xl opacity-20"></i>
+            </div>
+            <p class="font-medium">Belum ada koleksi buku</p>
+            <p class="text-sm">Silahkan tambah buku baru untuk memulai</p>
+        </div>
+        @endforelse
     </div>
 
 </div>
@@ -169,8 +160,16 @@ function tutupModal() {
 // Search
 document.getElementById('searchInput').addEventListener('input', function () {
     const q = this.value.toLowerCase();
-    document.querySelectorAll('.buku-row').forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+    document.querySelectorAll('.buku-card').forEach(card => {
+        const title = card.getAttribute('data-judul').toLowerCase();
+        const author = card.getAttribute('data-pengarang').toLowerCase();
+        const code = card.getAttribute('data-kode').toLowerCase();
+        
+        if (title.includes(q) || author.includes(q) || code.includes(q)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
     });
 });
 </script>

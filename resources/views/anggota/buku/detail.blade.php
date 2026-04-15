@@ -14,7 +14,7 @@
     <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div class="aspect-[4/5] overflow-hidden bg-slate-100">
-                <img src="{{ $buku->cover ? asset('assets/images/' . $buku->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover">
+                <img src="{{ $buku->cover ? asset('storage/' . $buku->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover">
             </div>
         </div>
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -22,7 +22,8 @@ class Buku extends Model
         'kategori',
         'stok',
         'status',
-        'cover'
+        'cover',
+        'deskripsi'
     ];
 
     // Kalau gak pakai created_at & updated_at

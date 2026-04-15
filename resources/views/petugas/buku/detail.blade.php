@@ -15,7 +15,7 @@
         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 flex items-center gap-6">
             <div class="w-28 h-36 bg-white/20 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                 @if($buku->cover)
-                    <img src="{{ asset('assets/images/' . $buku->cover) }}" class="w-full h-full object-cover rounded-xl">
+                    <img src="{{ asset('storage/' . $buku->cover) }}" class="w-full h-full object-cover rounded-xl">
                 @else
                     <i class="fas fa-book text-white/60 text-4xl"></i>
                 @endif

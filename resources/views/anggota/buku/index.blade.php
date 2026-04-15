@@ -28,7 +28,7 @@
         @forelse ($buku as $item)
         <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
             <div class="aspect-[4/5] overflow-hidden bg-slate-100">
-                <img src="{{ $item->cover ? asset('assets/images/' . $item->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover">
+                <img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover">
             </div>
             <div class="p-5">
                 <div class="flex items-start justify-between gap-4">

@@ -9,12 +9,13 @@
     </h2>
 
     <div class="bg-white p-6 rounded-xl shadow">
-        <div class="w-full aspect-[3/4] overflow-hidden rounded-xl mb-4">
-    <img src="{{ $item->gambar
-        ? asset('storage/' . $item->gambar)
-        : 'https://via.placeholder.com/300x400' }}"
-        class="w-full h-full object-cover">
-</div>
+        <div class="w-full aspect-[3/4] overflow-hidden rounded-xl mb-4 bg-gray-50 border flex items-center justify-center">
+            @if($buku->cover)
+                <img src="{{ asset('storage/' . $buku->cover) }}" class="w-full h-full object-cover">
+            @else
+                <i class="fas fa-book text-gray-300 text-5xl"></i>
+            @endif
+        </div>
 
         <!-- ✅ FIX ROUTE -->
         <form action="{{ route('anggota.pinjam', $buku->id) }}" method="POST">
