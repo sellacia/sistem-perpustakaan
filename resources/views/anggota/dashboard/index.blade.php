@@ -2,19 +2,6 @@
 
 @section('content')
 <div class="space-y-6">
-    <section class="overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-900 via-sky-900 to-cyan-700 px-6 py-8 text-white shadow-xl">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-2xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Dashboard Anggota</p>
-                <h1 class="mt-3 text-3xl font-bold leading-tight lg:text-4xl">Kelola pinjaman buku dan pantau denda Anda dalam satu tempat.</h1>
-                <p class="mt-3 text-sm leading-7 text-slate-200">Semua informasi utama untuk anggota sudah diringkas agar status pinjaman, keterlambatan, dan pengembalian mudah dipantau.</p>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
-                <p class="text-xs uppercase tracking-[0.18em] text-cyan-100/70">Hari Ini</p>
-                <p class="mt-2 font-semibold">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}</p>
-            </div>
-        </div>
-    </section>
 
     <section class="grid gap-4 md:grid-cols-3">
         @foreach([
@@ -35,6 +22,7 @@
         </article>
         @endforeach
     </section>
+
 
     <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -1,28 +1,104 @@
 @extends('layouts.kepala.app')
 
 @section('content')
-<div class="space-y-6">
-    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
-        <div class="max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100">Katalog Buku</p>
-            <h1 class="mt-3 text-3xl font-bold">Pantau koleksi buku perpustakaan dengan tampilan yang lebih rapi.</h1>
-            <p class="mt-3 text-sm leading-7 text-cyan-50/90">Area kepala kini memakai pola visual yang sama dengan dashboard petugas supaya lebih konsisten.</p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm"><p class="text-xs uppercase tracking-[0.18em] text-cyan-100/70">Total Buku</p><p class="mt-2 text-2xl font-bold">{{ count($buku) }}</p></div>
-    </section>
-    <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        @forelse ($buku as $item)
-        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-            <div class="aspect-[4/5] overflow-hidden bg-slate-100"><img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover"></div>
-            <div class="p-5">
-                <div class="flex items-start justify-between gap-4"><div><h3 class="text-lg font-bold text-slate-900">{{ $item->judul }}</h3><p class="mt-1 text-sm text-slate-500">{{ $item->pengarang }}</p></div><span class="rounded-full {{ $item->stok > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }} px-3 py-1 text-xs font-semibold">{{ $item->stok > 0 ? 'Tersedia' : 'Kosong' }}</span></div>
-                <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600"><div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Kode</p><p class="mt-1 font-semibold text-slate-800">{{ $item->kode_buku }}</p></div><div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Stok</p><p class="mt-1 font-semibold text-slate-800">{{ $item->stok }} buku</p></div><div class="col-span-2 rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Penerbit</p><p class="mt-1 font-semibold text-slate-800">{{ $item->penerbit }}</p></div></div>
-                <div class="mt-5"><a href="{{ route('kepala.buku.show', $item->id) }}" class="block rounded-2xl bg-sky-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-sky-700">Lihat Detail</a></div>
+    <div class="p-6 space-y-6">
+
+        {{-- HEADER --}}
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Katalog Buku</h1>
             </div>
-        </article>
-        @empty
-        <div class="col-span-full rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-400 shadow-sm">Belum ada data buku.</div>
-        @endforelse
-    </section>
-</div>
+            <div class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-sm font-semibold">
+                Total: {{ count($buku) }}
+            </div>
+        </div>
+
+        {{-- SEARCH --}}
+        <div class="relative mb-4">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" id="searchInput" placeholder="Cari judul, pengarang, kode buku..."
+                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+        </div>
+
+        {{-- GRID CARD --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+
+            @forelse ($buku as $item)
+                <div class="buku-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group hover:shadow-md transition"
+                    data-search="{{ strtolower($item->judul . ' ' . $item->pengarang . ' ' . $item->kode_buku) }}">
+
+                    {{-- COVER --}}
+                    <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
+
+                        @if ($item->cover)
+                            <img src="{{ asset('assets/images/' . basename($item->cover)) }}"
+                                class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                <i class="fas fa-book text-5xl mb-2"></i>
+                                <span class="text-xs">No Cover</span>
+                            </div>
+                        @endif
+
+                        {{-- HOVER --}}
+                        <div
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <a href="{{ route('kepala.buku.show', $item->id) }}"
+                                class="w-10 h-10 bg-white text-blue-600 rounded-full flex items-center justify-center shadow hover:bg-blue-50">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+
+                    </div>
+
+                    {{-- CONTENT --}}
+                    <div class="p-4 flex flex-col flex-grow">
+
+                        <div class="text-[10px] font-mono text-gray-400 mb-1 uppercase">
+                            {{ $item->kode_buku }}
+                        </div>
+
+                        <h3 class="font-bold text-gray-800 text-sm line-clamp-2 mb-1">
+                            {{ $item->judul }}
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mb-3">
+                            {{ $item->pengarang }}
+                        </p>
+
+                        <div class="mt-auto pt-3 border-t flex justify-between text-xs">
+                            <span class="text-gray-400">{{ $item->tahun }}</span>
+                            <span class="font-bold {{ $item->stok > 0 ? 'text-blue-600' : 'text-red-500' }}">
+                                Stok: {{ $item->stok }}
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+            @empty
+                <div class="col-span-full text-center text-gray-400 py-10">
+                    Belum ada data buku
+                </div>
+            @endforelse
+
+        </div>
+    </div>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const bukuCards = document.querySelectorAll('.buku-card');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+
+            bukuCards.forEach(card => {
+                const searchData = card.getAttribute('data-search');
+                if (searchData.includes(query)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
 @endsection

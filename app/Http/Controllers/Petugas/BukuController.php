@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Buku;
-use Illuminate\Support\Facades\Storage;
 
 class BukuController extends Controller
 {
@@ -35,23 +34,19 @@ class BukuController extends Controller
             'cover' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        $coverPath = null;
+        $data = $request->all();
+
+        // upload cover (PAKAI PUBLIC)
         if ($request->hasFile('cover')) {
-            $coverPath = $request->file('cover')->store('covers', 'public');
+            $file = $request->file('cover');
+            $namaFile = time() . '.' . $file->getClientOriginalExtension();
+
+            $file->move(public_path('assets/images'), $namaFile);
+
+            $data['cover'] = $namaFile;
         }
 
-        Buku::create([
-            'kode_buku' => $request->kode_buku,
-            'judul' => $request->judul,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun,
-            'kategori' => $request->kategori,
-            'deskripsi' => $request->deskripsi,
-            'stok' => $request->stok,
-            'status' => $request->status,
-            'cover' => $coverPath
-        ]);
+        Buku::create($data);
 
         return redirect('/petugas/buku')->with('success', 'Buku berhasil ditambahkan!');
     }
@@ -78,25 +73,23 @@ class BukuController extends Controller
         ]);
 
         $buku = Buku::findOrFail($id);
-        
-        $data = [
-            'kode_buku' => $request->kode_buku,
-            'judul' => $request->judul,
-            'pengarang' => $request->pengarang,
-            'penerbit' => $request->penerbit,
-            'tahun' => $request->tahun,
-            'kategori' => $request->kategori,
-            'deskripsi' => $request->deskripsi,
-            'stok' => $request->stok,
-            'status' => $request->status,
-        ];
 
+        $data = $request->all();
+
+        // upload cover baru
         if ($request->hasFile('cover')) {
-            // Hapus cover lama jika ada
-            if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
-                Storage::disk('public')->delete($buku->cover);
+
+            // hapus cover lama
+            if ($buku->cover && file_exists(public_path('assets/images/' . $buku->cover))) {
+                unlink(public_path('assets/images/' . $buku->cover));
             }
-            $data['cover'] = $request->file('cover')->store('covers', 'public');
+
+            $file = $request->file('cover');
+            $namaFile = time() . '.' . $file->getClientOriginalExtension();
+
+            $file->move(public_path('assets/images'), $namaFile);
+
+            $data['cover'] = $namaFile;
         }
 
         $buku->update($data);
@@ -115,12 +108,12 @@ class BukuController extends Controller
         $buku = Buku::findOrFail($id);
 
         if ($buku->peminjamanAktif()->exists() || $buku->status === 'dipinjam') {
-            return redirect('/petugas/buku')->with('error', 'Buku tidak bisa dihapus karena masih sedang dipinjam atau masih dalam proses pengembalian.');
+            return redirect('/petugas/buku')->with('error', 'Buku tidak bisa dihapus karena masih dipinjam.');
         }
 
-        // Hapus cover jika ada
-        if ($buku->cover && Storage::disk('public')->exists($buku->cover)) {
-            Storage::disk('public')->delete($buku->cover);
+        // hapus cover juga
+        if ($buku->cover && file_exists(public_path('assets/images/' . $buku->cover))) {
+            unlink(public_path('assets/images/' . $buku->cover));
         }
 
         $buku->delete();

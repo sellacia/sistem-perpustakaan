@@ -15,18 +15,6 @@
         $countMenunggu = $data->filter(fn($item) => $resolveStatus($item) === 'menunggu_konfirmasi')->count();
     @endphp
 
-    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-rose-700 via-orange-600 to-amber-500 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
-        <div class="max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-amber-100">Kelola Denda</p>
-            <h1 class="mt-3 text-3xl font-bold">Pastikan pembayaran denda tercatat dengan jelas.</h1>
-            <p class="mt-3 text-sm leading-7 text-orange-50/90">Semua denda aktif dan riwayat pelunasan ditampilkan ringkas agar tindak lanjut lebih cepat dan minim kesalahan.</p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
-            <p class="text-xs uppercase tracking-[0.18em] text-amber-100/70">Denda Aktif</p>
-            <p class="mt-2 text-2xl font-bold">{{ $countBelum }}</p>
-        </div>
-    </section>
-
     @if(session('success'))
     <div data-auto-dismiss class="transform rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700 shadow-sm transition duration-300">
         <div class="flex items-center gap-3"><i class="fas fa-circle-check"></i><span>{{ session('success') }}</span></div>
@@ -64,7 +52,6 @@
     <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-5">
             <h2 class="text-lg font-bold text-slate-900">Rincian Denda</h2>
-            <p class="text-sm text-slate-500">Gunakan aksi konfirmasi untuk menandai denda sebagai lunas.</p>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">

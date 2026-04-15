@@ -2,25 +2,6 @@
 
 @section('content')
 <div class="space-y-6">
-    <section class="overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-900 via-sky-900 to-cyan-700 px-6 py-8 text-white shadow-xl">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-2xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Panel Petugas</p>
-                <h1 class="mt-3 text-3xl font-bold leading-tight lg:text-4xl">Kelola sirkulasi perpustakaan dengan alur yang lebih rapi dan cepat.</h1>
-                <p class="mt-3 text-sm leading-7 text-slate-200">Selamat datang, {{ auth()->user()->name }}. Dashboard ini merangkum aktivitas penting supaya proses peminjaman, pengembalian, dan tindak lanjut anggota terasa lebih profesional.</p>
-            </div>
-            <div class="grid gap-3 sm:grid-cols-2">
-                <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                    <p class="text-xs uppercase tracking-[0.18em] text-cyan-100/70">Hari Ini</p>
-                    <p class="mt-2 text-sm font-semibold">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}</p>
-                </div>
-                <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                    <p class="text-xs uppercase tracking-[0.18em] text-cyan-100/70">Total Outstanding</p>
-                    <p class="mt-2 text-sm font-semibold">{{ $dipinjam + $terlambat }} transaksi aktif</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         @foreach([
@@ -49,7 +30,6 @@
             <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
                 <div>
                     <h2 class="text-lg font-bold text-slate-900">Peminjaman Terbaru</h2>
-                    <p class="text-sm text-slate-500">Pantau transaksi terakhir tanpa pindah halaman.</p>
                 </div>
                 <a href="{{ route('petugas.peminjaman') }}" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
                     Lihat Semua <i class="fas fa-arrow-right text-xs"></i>
@@ -111,28 +91,11 @@
                     <div class="rounded-2xl bg-rose-50 p-4">
                         <p class="text-sm font-semibold text-rose-700">Peminjaman terlambat</p>
                         <p class="mt-2 text-3xl font-bold text-rose-900">{{ $terlambat }}</p>
-                        <p class="mt-1 text-sm text-rose-600">Segera tindak lanjuti anggota dengan keterlambatan aktif.</p>
                     </div>
                     <div class="rounded-2xl bg-amber-50 p-4">
                         <p class="text-sm font-semibold text-amber-700">Denda belum lunas</p>
                         <p class="mt-2 text-3xl font-bold text-amber-900">Rp {{ number_format($denda, 0, ',', '.') }}</p>
-                        <p class="mt-1 text-sm text-amber-600">Pastikan konfirmasi pembayaran sudah dicatat.</p>
                     </div>
-                </div>
-            </div>
-
-            <div class="rounded-3xl bg-slate-900 p-6 text-white shadow-sm">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Akses Cepat</p>
-                <div class="mt-5 grid gap-3">
-                    <a href="{{ route('petugas.buku.index') }}" class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold transition hover:bg-white/10">
-                        Kelola Buku <i class="fas fa-chevron-right text-xs"></i>
-                    </a>
-                    <a href="{{ route('petugas.pengembalian') }}" class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold transition hover:bg-white/10">
-                        Konfirmasi Pengembalian <i class="fas fa-chevron-right text-xs"></i>
-                    </a>
-                    <a href="{{ route('petugas.anggota.index') }}" class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold transition hover:bg-white/10">
-                        Data Anggota <i class="fas fa-chevron-right text-xs"></i>
-                    </a>
                 </div>
             </div>
         </div>

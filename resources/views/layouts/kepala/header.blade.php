@@ -1,8 +1,7 @@
 <div class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 px-6 py-4 shadow-sm backdrop-blur">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Panel Manajemen</p>
-            <h1 class="mt-1 text-lg font-bold text-slate-900">Area Kepala Perpustakaan</h1>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Sistem Perpustakaan</p>
         </div>
         <div class="flex items-center gap-3 self-start rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 lg:self-auto">
             <div class="text-right">

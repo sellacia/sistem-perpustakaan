@@ -9,20 +9,8 @@
         $aktif = $data->whereIn('status', ['dipinjam', 'menunggu'])->count();
     @endphp
 
-    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
-        <div class="max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">Kelola Laporan</p>
-            <h1 class="mt-3 text-3xl font-bold">Filter, rangkum, dan cetak data transaksi perpustakaan.</h1>
-            <p class="mt-3 text-sm leading-7 text-slate-300">Halaman laporan dirapikan supaya petugas mudah membaca performa transaksi sebelum mengekspor PDF.</p>
-        </div>
-        <a href="{{ route('petugas.laporan.export-pdf') }}?mulai={{ request('mulai') }}&sampai={{ request('sampai') }}" target="_blank" class="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
-            <i class="fas fa-file-pdf"></i> Cetak PDF
-        </a>
-    </section>
-
     <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 class="text-lg font-bold text-slate-900">Filter Periode</h2>
-        <p class="mt-1 text-sm text-slate-500">Pilih tanggal mulai dan selesai untuk mempersempit data laporan.</p>
         <form method="GET" action="{{ route('petugas.laporan') }}" class="mt-5 flex flex-wrap items-end gap-4">
             <div>
                 <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Tanggal Mulai</label>
@@ -57,7 +45,10 @@
     <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-5">
             <h2 class="text-lg font-bold text-slate-900">Detail Laporan</h2>
-            <p class="text-sm text-slate-500">Ringkasan transaksi lengkap untuk periode yang dipilih.</p>
+            <a href="{{ route('petugas.laporan.export-pdf') }}?mulai={{ request('mulai') }}&sampai={{ request('sampai') }}" target="_blank" class="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+            <i class="fas fa-file-pdf"></i> Cetak PDF
+        </a>
+
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">

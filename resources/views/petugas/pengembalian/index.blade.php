@@ -2,18 +2,6 @@
 
 @section('content')
 <div class="space-y-6">
-    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
-        <div class="max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-100">Proses Pengembalian</p>
-            <h1 class="mt-3 text-3xl font-bold">Selesaikan pengembalian buku dengan konfirmasi yang jelas.</h1>
-            <p class="mt-3 text-sm leading-7 text-emerald-50/90">Halaman ini membantu petugas memastikan buku yang sudah kembali benar-benar selesai diproses.</p>
-        </div>
-        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
-            <p class="text-xs uppercase tracking-[0.18em] text-emerald-100/70">Perlu Konfirmasi</p>
-            <p class="mt-2 text-2xl font-bold">{{ $pinjam->where('status', 'dikembalikan')->count() }}</p>
-        </div>
-    </section>
-
     @if(session('success'))
     <div data-auto-dismiss class="transform rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700 shadow-sm transition duration-300">
         <div class="flex items-center gap-3"><i class="fas fa-circle-check"></i><span>{{ session('success') }}</span></div>
@@ -29,7 +17,6 @@
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
             <div>
                 <h2 class="text-lg font-bold text-slate-900">Daftar Pengembalian</h2>
-                <p class="text-sm text-slate-500">Aksi konfirmasi menampilkan alert agar proses lebih aman.</p>
             </div>
             <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $pinjam->count() }} data</span>
         </div>

@@ -31,8 +31,7 @@
                     <i class="fas fa-image text-gray-400 text-3xl mb-2 group-hover:text-blue-500 transition-colors"></i>
                     <div class="flex text-sm text-gray-600">
                         <label for="cover" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                            <span>Upload cover buku</span>
-                            <input id="cover" name="cover" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)">
+                            <input id="cover" name="cover" type="file" accept="image/*" onchange="previewImage(this)">
                         </label>
                         <p class="pl-1">atau drag and drop</p>
                     </div>
@@ -66,21 +65,6 @@
                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="Masukkan judul buku">
         </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Kategori</label>
-            <input type="text" name="kategori" value="{{ old('kategori') }}"
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Cth: Novel, Sains, Sejarah">
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Deskripsi</label>
-            <textarea name="deskripsi" rows="3"
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="Masukkan ringkasan atau keterangan buku">{{ old('deskripsi') }}</textarea>
-        </div>
-
         <div class="grid grid-cols-2 gap-5">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Pengarang <span class="text-red-500">*</span></label>
@@ -130,16 +114,16 @@
 function previewImage(input) {
     const preview = document.getElementById('preview');
     const removeBtn = document.getElementById('remove-preview');
-    
+
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        
+
         reader.onload = function(e) {
             preview.src = e.target.result;
             preview.classList.remove('hidden');
             removeBtn.classList.remove('hidden');
         }
-        
+
         reader.readAsDataURL(input.files[0]);
     }
 }
@@ -148,7 +132,7 @@ function removeImage() {
     const input = document.getElementById('cover');
     const preview = document.getElementById('preview');
     const removeBtn = document.getElementById('remove-preview');
-    
+
     input.value = '';
     preview.src = '';
     preview.classList.add('hidden');

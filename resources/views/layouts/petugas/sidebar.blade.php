@@ -6,12 +6,11 @@
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Perpustakaan</p>
-                <h1 class="mt-1 text-lg font-bold">Panel Petugas</h1>
+                <h1 class="mt-1 text-lg font-bold"> Digital</h1>
             </div>
         </div>
     </div>
 
-    <div class="px-4 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Navigasi</div>
     <ul class="flex-1 space-y-1 overflow-y-auto px-4 pb-4 text-sm">
         @php
             $menus = [
