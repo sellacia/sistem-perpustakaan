@@ -1,174 +1,97 @@
 @extends('layouts.petugas.app')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="space-y-6">
+    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-100">Proses Pengembalian</p>
+            <h1 class="mt-3 text-3xl font-bold">Selesaikan pengembalian buku dengan konfirmasi yang jelas.</h1>
+            <p class="mt-3 text-sm leading-7 text-emerald-50/90">Halaman ini membantu petugas memastikan buku yang sudah kembali benar-benar selesai diproses.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
+            <p class="text-xs uppercase tracking-[0.18em] text-emerald-100/70">Perlu Konfirmasi</p>
+            <p class="mt-2 text-2xl font-bold">{{ $pinjam->where('status', 'dikembalikan')->count() }}</p>
+        </div>
+    </section>
 
-    {{-- Header --}}
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800">Proses Pengembalian</h1>
-        <p class="text-sm text-gray-500 mt-1">Konfirmasi pengembalian buku dari anggota</p>
-    </div>
-
-    {{-- Alert --}}
     @if(session('success'))
-    <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
-        <i class="fas fa-check-circle text-green-500 text-base"></i> {{ session('success') }}
+    <div data-auto-dismiss class="transform rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700 shadow-sm transition duration-300">
+        <div class="flex items-center gap-3"><i class="fas fa-circle-check"></i><span>{{ session('success') }}</span></div>
     </div>
     @endif
     @if(session('error'))
-    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
-        <i class="fas fa-exclamation-circle text-red-500 text-base"></i> {{ session('error') }}
+    <div data-auto-dismiss class="transform rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 shadow-sm transition duration-300">
+        <div class="flex items-center gap-3"><i class="fas fa-circle-exclamation"></i><span>{{ session('error') }}</span></div>
     </div>
     @endif
 
-    {{-- Info Box --}}
-    <div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm">
-        <i class="fas fa-info-circle text-blue-500 mt-0.5 shrink-0"></i>
-        <div>
-            <p class="font-medium">Petunjuk</p>
-            <p class="text-blue-600 mt-0.5">Halaman ini menampilkan buku yang sudah dikembalikan/terlambat. Klik <strong>Konfirmasi</strong> untuk menyelesaikan proses pengembalian.</p>
-        </div>
-    </div>
-
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-800">Daftar Pengembalian</h2>
-            <span class="text-xs text-gray-400">{{ $pinjam->count() }} data</span>
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Daftar Pengembalian</h2>
+                <p class="text-sm text-slate-500">Aksi konfirmasi menampilkan alert agar proses lebih aman.</p>
+            </div>
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $pinjam->count() }} data</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <tr>
-                        <th class="px-5 py-3 text-left font-semibold">No</th>
-                        <th class="px-5 py-3 text-left font-semibold">Nama Anggota</th>
-                        <th class="px-5 py-3 text-left font-semibold">Judul Buku</th>
-                        <th class="px-5 py-3 text-left font-semibold">Tgl Pinjam</th>
-                        <th class="px-5 py-3 text-left font-semibold">Batas Kembali</th>
-                        <th class="px-5 py-3 text-left font-semibold">Tgl Dikembalikan</th>
-                        <th class="px-5 py-3 text-center font-semibold">Status</th>
-                        <th class="px-5 py-3 text-right font-semibold">Denda</th>
-                        <th class="px-5 py-3 text-center font-semibold">Aksi</th>
+                        <th class="px-6 py-4">No</th>
+                        <th class="px-6 py-4">Anggota</th>
+                        <th class="px-6 py-4">Buku</th>
+                        <th class="px-6 py-4">Tgl Pinjam</th>
+                        <th class="px-6 py-4">Batas Kembali</th>
+                        <th class="px-6 py-4">Tgl Dikembalikan</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-right">Denda</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-slate-100">
                     @forelse ($pinjam as $item)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-3 text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-5 py-3 font-medium text-gray-800">
-                            {{ $item->anggota->name ?? '-' }}
+                    <tr class="transition hover:bg-slate-50">
+                        <td class="px-6 py-4 text-slate-500">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-900">{{ $item->anggota->name ?? '-' }}</td>
+                        <td class="px-6 py-4 text-slate-700">{{ $item->buku->judul ?? '-' }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M Y') }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($item->tanggal_wajib_kembali)->format('d M Y') }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $item->display_tanggal_kembali ? \Carbon\Carbon::parse($item->display_tanggal_kembali)->format('d M Y') : '-' }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $item->status == 'dikembalikan' ? 'border-amber-200 bg-amber-50 text-amber-700' : ($item->status == 'terlambat' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700') }}">
+                                {{ $item->status == 'dikembalikan' ? 'Menunggu Konfirmasi' : ucfirst($item->status) }}
+                            </span>
                         </td>
-                        <td class="px-5 py-3 text-gray-700 max-w-[180px]">
-                            <div class="truncate" title="{{ $item->buku->judul ?? '-' }}">
-                                {{ $item->buku->judul ?? '-' }}
-                            </div>
+                        <td class="px-6 py-4 text-right font-semibold {{ ($item->dendaData->jumlah_denda ?? 0) > 0 ? 'text-rose-600' : 'text-slate-400' }}">
+                            {{ ($item->dendaData->jumlah_denda ?? 0) > 0 ? 'Rp ' . number_format($item->dendaData->jumlah_denda, 0, ',', '.') : '-' }}
                         </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M Y') }}
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ \Carbon\Carbon::parse($item->tanggal_wajib_kembali)->format('d M Y') }}
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ $item->tanggal_kembali ? \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') : '-' }}
-                        </td>
-                        <td class="px-5 py-3 text-center">
+                        <td class="px-6 py-4 text-center">
                             @if ($item->status == 'dikembalikan')
-                                <span class="inline-flex items-center gap-1 bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span> Menunggu Konfirmasi
+                                @if ($item->dendaData && $item->dendaData->status === 'belum_bayar')
+                                <span class="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+                                    <i class="fas fa-wallet"></i> Tunggu Lunas Denda
                                 </span>
-                            @elseif ($item->status == 'terlambat')
-                                <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Terlambat
-                                </span>
-                            @elseif ($item->status == 'selesai')
-                                <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            @if ($item->dendaData && $item->dendaData->jumlah_denda > 0)
-                                <span class="font-semibold text-red-600">
-                                    Rp {{ number_format($item->dendaData->jumlah_denda, 0, ',', '.') }}
-                                </span>
+                                @else
+                                <form action="{{ route('petugas.pengembalian.konfirmasi', $item->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" data-confirm data-confirm-title="Konfirmasi pengembalian?" data-confirm-message="Pengembalian buku {{ $item->buku->judul ?? '-' }} atas nama {{ $item->anggota->name ?? '-' }} akan diselesaikan." class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700">
+                                        <i class="fas fa-check"></i> Konfirmasi
+                                    </button>
+                                </form>
+                                @endif
                             @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if ($item->status == 'dikembalikan')
-                                <button type="button"
-                                    onclick="openModal({{ $item->id }}, '{{ addslashes($item->anggota->name ?? '-') }}', '{{ addslashes($item->buku->judul ?? '-') }}')"
-                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                    <i class="fas fa-check mr-1"></i>Konfirmasi
-                                </button>
-                            @else
-                                <span class="text-gray-300 text-xs">—</span>
+                            <span class="text-xs font-semibold text-slate-300">Tidak ada aksi</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="px-5 py-12 text-center text-gray-400">
-                            <i class="fas fa-check-double text-4xl mb-3 block opacity-30"></i>
-                            Tidak ada data pengembalian yang perlu dikonfirmasi
-                        </td>
+                        <td colspan="9" class="px-6 py-12 text-center text-slate-400">Tidak ada data pengembalian yang perlu dikonfirmasi.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </div>
-
-{{-- Modal Konfirmasi --}}
-<div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-        <div class="text-center mb-4">
-            <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-check text-green-500 text-xl"></i>
-            </div>
-            <h2 class="font-bold text-lg text-gray-800">Konfirmasi Pengembalian</h2>
-            <p class="text-sm text-gray-500 mt-1">Apakah pengembalian ini sudah selesai?</p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 mb-5 space-y-2">
-            <div class="flex items-center gap-2 text-sm">
-                <i class="fas fa-user text-gray-400 w-4"></i>
-                <span class="text-gray-500">Anggota:</span>
-                <span class="font-semibold text-gray-800" id="namaAnggota"></span>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-                <i class="fas fa-book text-gray-400 w-4"></i>
-                <span class="text-gray-500">Buku:</span>
-                <span class="font-semibold text-gray-800" id="judulBuku"></span>
-            </div>
-        </div>
-        <form id="formKonfirmasi" method="POST">
-            @csrf
-            <div class="flex gap-3">
-                <button type="button" onclick="closeModal()"
-                    class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm transition">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition">
-                    <i class="fas fa-check mr-1"></i>Konfirmasi
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-function openModal(id, nama, buku) {
-    document.getElementById('modal').classList.remove('hidden');
-    document.getElementById('namaAnggota').innerText = nama;
-    document.getElementById('judulBuku').innerText = buku;
-    document.getElementById('formKonfirmasi').action = `/petugas/pengembalian/${id}/konfirmasi`;
-}
-function closeModal() {
-    document.getElementById('modal').classList.add('hidden');
-}
-</script>
 @endsection

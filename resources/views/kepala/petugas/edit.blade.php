@@ -1,67 +1,8 @@
 @extends('layouts.kepala.app')
 
 @section('content')
-    <div class="p-6">
-
-        <!-- TITLE -->
-        <h1 class="text-2xl font-bold text-blue-600 mb-4">
-            Edit Petugas
-        </h1>
-
-        <!-- CARD FULL -->
-        <div class="bg-white rounded-2xl shadow p-6">
-
-            <h2 class="text-blue-500 font-semibold mb-4">
-                Form Edit Petugas
-            </h2>
-
-            <form action="{{ route('kepala.petugas.update', $petugas->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <!-- Nama -->
-                <div class="mb-4">
-                    <label class="block text-sm mb-1">Nama</label>
-                    <input type="text" name="name" value="{{ $petugas->name }}"
-                        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                </div>
-
-                <!-- Username -->
-                <div class="mb-4">
-                    <label class="block text-sm mb-1">Username</label>
-                    <input type="text" name="username" value="{{ $petugas->username }}"
-                        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                </div>
-
-                <!-- GRID 2 KOLOM -->
-                <div class="grid md:grid-cols-2 gap-4 mb-4">
-
-                    <div>
-                        <label class="block text-sm mb-1">No Telp</label>
-                        <input type="text" name="no_telp" value="{{ $petugas->no_telp }}"
-                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm mb-1">Alamat</label>
-                        <input type="text" name="alamat" value="{{ $petugas->alamat }}"
-                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                    </div>
-
-                </div>
-
-                <!-- BUTTON -->
-                <div class="flex justify-end gap-3 mt-6">
-                    <a href="{{ route('kepala.petugas.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg">
-                        Batal
-                    </a>
-
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-                        Update
-                    </button>
-                </div>
-
-            </form>
-        </div>
-    </div>
+<div class="mx-auto max-w-4xl space-y-6">
+    <div class="flex items-center justify-between gap-4"><div><p class="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">Perbarui Petugas</p><h1 class="mt-2 text-3xl font-bold text-slate-900">Edit akun {{ $petugas->name }}</h1><p class="mt-2 text-sm text-slate-500">Perbarui data petugas tanpa mengubah visual kerja yang konsisten.</p></div><a href="{{ route('kepala.petugas.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"><i class="fas fa-arrow-left"></i> Kembali</a></div>
+    <form action="{{ route('kepala.petugas.update', $petugas->id) }}" method="POST" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">@csrf @method('PUT')<div class="grid gap-5 md:grid-cols-2"><div><label class="mb-2 block text-sm font-semibold text-slate-700">Nama</label><input type="text" name="name" value="{{ $petugas->name }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-100"></div><div><label class="mb-2 block text-sm font-semibold text-slate-700">Username</label><input type="text" name="username" value="{{ $petugas->username }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-100"></div><div><label class="mb-2 block text-sm font-semibold text-slate-700">No Telp</label><input type="text" name="no_telp" value="{{ $petugas->no_telp }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-100"></div><div><label class="mb-2 block text-sm font-semibold text-slate-700">Alamat</label><input type="text" name="alamat" value="{{ $petugas->alamat }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-100"></div></div><div class="mt-6 flex justify-end gap-3"><a href="{{ route('kepala.petugas.index') }}" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Batal</a><button type="submit" class="rounded-2xl bg-amber-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-600">Simpan Perubahan</button></div></form>
+</div>
 @endsection

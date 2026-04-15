@@ -19,8 +19,7 @@ class DashboardController extends Controller
 
             'totalPinjam' => Peminjaman::where('status', 'dipinjam')->count(),
 
-            //sementara dulu
-            'totalDenda' => 0,
+            'totalDenda' => Denda::where('status', '!=', 'dibayar')->sum('jumlah_denda'),
 
             'peminjaman' => Peminjaman::with(['user', 'buku'])
                 ->latest()

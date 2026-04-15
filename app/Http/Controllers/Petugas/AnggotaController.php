@@ -10,7 +10,7 @@ class AnggotaController extends Controller
 {
     public function index()
     {
-        $anggota = User::where('role', 'anggota')->get();
+        $anggota = User::where('role', 'anggota')->latest()->get();
         return view('petugas.anggota.index', compact('anggota'));
     }
 
@@ -21,12 +21,20 @@ class AnggotaController extends Controller
 
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
+            'password' => 'required|string|min:6',
+            'no_telp' => 'required|string|max:20',
+            'alamat' => 'required|string|max:255',
+        ]);
+
         User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'password' => bcrypt($request->password),
-            'no_telp' => $request->no_telp,
-            'alamat' => $request->alamat,
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'password' => bcrypt($validated['password']),
+            'no_telp' => $validated['no_telp'],
+            'alamat' => $validated['alamat'],
             'role' => 'anggota'
         ]);
 
@@ -43,17 +51,49 @@ class AnggotaController extends Controller
     {
         $anggota = User::findOrFail($id);
 
-        $anggota->update([
-            'name' => $request->name,
-            'username' => $request->username
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $anggota->id,
+            'password' => 'nullable|string|min:6',
+            'no_telp' => 'required|string|max:20',
+            'alamat' => 'required|string|max:255',
         ]);
 
-        return redirect()->route('petugas.anggota.index')->with('success', 'Data berhasil diupdate');
+        $payload = [
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'no_telp' => $validated['no_telp'],
+            'alamat' => $validated['alamat'],
+        ];
+
+        if (!empty($validated['password'])) {
+            $payload['password'] = bcrypt($validated['password']);
+        }
+
+        $anggota->update($payload);
+
+        return redirect()->route('petugas.anggota.index')->with('success', 'Data anggota berhasil diperbarui');
+    }
+
+    public function show($id)
+    {
+        $anggota = User::where('role', 'anggota')->findOrFail($id);
+        return view('petugas.anggota.show', compact('anggota'));
     }
 
     public function destroy($id)
     {
-        User::findOrFail($id)->delete();
-        return back()->with('success', 'Data berhasil dihapus');
+        $anggota = User::where('role', 'anggota')->findOrFail($id);
+
+        if ($anggota->id === auth()->id()) {
+            return back()->with('error', 'Akun yang sedang digunakan tidak dapat dihapus.');
+        }
+
+        $anggota->update([
+            'remember_token' => null,
+        ]);
+
+        $anggota->delete();
+        return back()->with('success', 'Data anggota berhasil dihapus');
     }
 }

@@ -1,142 +1,130 @@
 @extends('layouts.petugas.app')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="space-y-6">
+    @php
+        $resolveStatus = function ($item) {
+            return in_array($item->peminjaman->status_denda ?? null, ['menunggu_konfirmasi', 'sudah_bayar'], true)
+                ? $item->peminjaman->status_denda
+                : $item->status;
+        };
+        $totalBelumBayar = $data->filter(fn($item) => $resolveStatus($item) === 'belum_bayar')->sum('jumlah_denda');
+        $totalMenungguKonfirmasi = $data->filter(fn($item) => $resolveStatus($item) === 'menunggu_konfirmasi')->sum('jumlah_denda');
+        $totalSudahBayar = $data->filter(fn($item) => $resolveStatus($item) === 'sudah_bayar')->sum('jumlah_denda');
+        $countBelum = $data->filter(fn($item) => $resolveStatus($item) === 'belum_bayar')->count();
+        $countMenunggu = $data->filter(fn($item) => $resolveStatus($item) === 'menunggu_konfirmasi')->count();
+    @endphp
 
-    {{-- Header --}}
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800">Kelola Denda</h1>
-        <p class="text-sm text-gray-500 mt-1">Manajemen denda keterlambatan pengembalian buku</p>
-    </div>
+    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-rose-700 via-orange-600 to-amber-500 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-amber-100">Kelola Denda</p>
+            <h1 class="mt-3 text-3xl font-bold">Pastikan pembayaran denda tercatat dengan jelas.</h1>
+            <p class="mt-3 text-sm leading-7 text-orange-50/90">Semua denda aktif dan riwayat pelunasan ditampilkan ringkas agar tindak lanjut lebih cepat dan minim kesalahan.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
+            <p class="text-xs uppercase tracking-[0.18em] text-amber-100/70">Denda Aktif</p>
+            <p class="mt-2 text-2xl font-bold">{{ $countBelum }}</p>
+        </div>
+    </section>
 
-    {{-- Alert --}}
     @if(session('success'))
-    <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
-        <i class="fas fa-check-circle text-green-500 text-base"></i> {{ session('success') }}
+    <div data-auto-dismiss class="transform rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700 shadow-sm transition duration-300">
+        <div class="flex items-center gap-3"><i class="fas fa-circle-check"></i><span>{{ session('success') }}</span></div>
     </div>
     @endif
     @if(session('error'))
-    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
-        <i class="fas fa-exclamation-circle text-red-500 text-base"></i> {{ session('error') }}
+    <div data-auto-dismiss class="transform rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 shadow-sm transition duration-300">
+        <div class="flex items-center gap-3"><i class="fas fa-circle-exclamation"></i><span>{{ session('error') }}</span></div>
     </div>
     @endif
 
-    {{-- Stats --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        @php
-            $totalBelumBayar = $data->where('status', 'belum_bayar')->sum('jumlah_denda');
-            $totalSudahBayar = $data->where('status', 'sudah_bayar')->sum('jumlah_denda');
-            $countBelum = $data->where('status', 'belum_bayar')->count();
-        @endphp
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-exclamation text-red-600"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Belum Dibayar</p>
-                <p class="font-bold text-lg text-gray-800">{{ $countBelum }} denda</p>
-                <p class="text-xs font-semibold text-red-600">Rp {{ number_format($totalBelumBayar, 0, ',', '.') }}</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-check text-green-600"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Sudah Dibayar</p>
-                <p class="font-bold text-lg text-gray-800">{{ $data->where('status', 'sudah_bayar')->count() }} denda</p>
-                <p class="text-xs font-semibold text-green-600">Rp {{ number_format($totalSudahBayar, 0, ',', '.') }}</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-                <i class="fas fa-coins text-blue-600"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Total Denda</p>
-                <p class="font-bold text-lg text-gray-800">{{ $data->count() }} denda</p>
-                <p class="text-xs font-semibold text-blue-600">Rp {{ number_format($totalBelumBayar + $totalSudahBayar, 0, ',', '.') }}</p>
-            </div>
-        </div>
-    </div>
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Belum Dibayar</p>
+            <p class="mt-4 text-3xl font-bold text-slate-900">{{ $countBelum }}</p>
+            <p class="mt-1 text-sm font-semibold text-rose-600">Rp {{ number_format($totalBelumBayar, 0, ',', '.') }}</p>
+        </article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Menunggu Konfirmasi</p>
+            <p class="mt-4 text-3xl font-bold text-slate-900">{{ $countMenunggu }}</p>
+            <p class="mt-1 text-sm font-semibold text-amber-600">Rp {{ number_format($totalMenungguKonfirmasi, 0, ',', '.') }}</p>
+        </article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Sudah Dibayar</p>
+            <p class="mt-4 text-3xl font-bold text-slate-900">{{ $data->where('status', 'sudah_bayar')->count() }}</p>
+            <p class="mt-1 text-sm font-semibold text-emerald-600">Rp {{ number_format($totalSudahBayar, 0, ',', '.') }}</p>
+        </article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total Nominal</p>
+            <p class="mt-4 text-3xl font-bold text-slate-900">Rp {{ number_format($totalBelumBayar + $totalSudahBayar, 0, ',', '.') }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ $data->count() }} catatan denda</p>
+        </article>
+    </section>
 
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-800">Rincian Denda</h2>
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-6 py-5">
+            <h2 class="text-lg font-bold text-slate-900">Rincian Denda</h2>
+            <p class="text-sm text-slate-500">Gunakan aksi konfirmasi untuk menandai denda sebagai lunas.</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <tr>
-                        <th class="px-5 py-3 text-left font-semibold">No</th>
-                        <th class="px-5 py-3 text-left font-semibold">Nama Anggota</th>
-                        <th class="px-5 py-3 text-left font-semibold">Judul Buku</th>
-                        <th class="px-5 py-3 text-center font-semibold">Keterlambatan</th>
-                        <th class="px-5 py-3 text-right font-semibold">Jumlah Denda</th>
-                        <th class="px-5 py-3 text-center font-semibold">Status</th>
-                        <th class="px-5 py-3 text-center font-semibold">Aksi</th>
+                        <th class="px-6 py-4">No</th>
+                        <th class="px-6 py-4">Anggota</th>
+                        <th class="px-6 py-4">Buku</th>
+                        <th class="px-6 py-4 text-center">Terlambat</th>
+                        <th class="px-6 py-4 text-right">Jumlah</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-slate-100">
                     @forelse ($data as $d)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-3 text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-5 py-3 font-medium text-gray-800">
-                            {{ $d->peminjaman->anggota->name ?? ($d->peminjaman->nama ?? '-') }}
-                        </td>
-                        <td class="px-5 py-3 text-gray-700 max-w-[180px]">
-                            <div class="truncate" title="{{ $d->peminjaman->buku->judul ?? '-' }}">
-                                {{ $d->peminjaman->buku->judul ?? '-' }}
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            <span class="bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                {{ $d->terlambat }} hari
+                    @php
+                        $statusDenda = in_array($d->peminjaman->status_denda ?? null, ['menunggu_konfirmasi', 'sudah_bayar'], true)
+                            ? $d->peminjaman->status_denda
+                            : $d->status;
+                    @endphp
+                    <tr class="transition hover:bg-slate-50">
+                        <td class="px-6 py-4 text-slate-500">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-900">{{ $d->peminjaman->anggota->name ?? ($d->peminjaman->nama ?? '-') }}</td>
+                        <td class="px-6 py-4 text-slate-700">{{ $d->peminjaman->buku->judul ?? '-' }}</td>
+                        <td class="px-6 py-4 text-center"><span class="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">{{ $d->terlambat }} hari</span></td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">Rp {{ number_format($d->jumlah_denda, 0, ',', '.') }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $statusDenda == 'belum_bayar' ? 'border-rose-200 bg-rose-50 text-rose-700' : ($statusDenda == 'menunggu_konfirmasi' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700') }}">
+                                {{ $statusDenda == 'belum_bayar' ? 'Belum Bayar' : ($statusDenda == 'menunggu_konfirmasi' ? 'Menunggu Konfirmasi' : 'Lunas') }}
                             </span>
                         </td>
-                        <td class="px-5 py-3 text-right font-bold text-gray-800">
-                            Rp {{ number_format($d->jumlah_denda, 0, ',', '.') }}
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if ($d->status == 'belum_bayar')
-                                <span class="inline-flex items-center gap-1 bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Belum Bayar
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Lunas
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if ($d->status == 'belum_bayar')
-                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="POST" class="inline"
-                                    onsubmit="return confirm('Konfirmasi pembayaran denda ini?')">
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex flex-wrap items-center justify-center gap-2">
+                                <a href="{{ route('petugas.denda.cetak', $d->id) }}" target="_blank" class="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition hover:bg-sky-100">
+                                    <i class="fas fa-print"></i> Cetak
+                                </a>
+                                @if ($statusDenda == 'menunggu_konfirmasi')
+                                <form action="{{ route('petugas.denda.bayar', $d->id) }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit"
-                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                        <i class="fas fa-check mr-1"></i>Konfirmasi Lunas
+                                    <button type="submit" data-confirm data-confirm-title="Konfirmasi pelunasan?" data-confirm-message="Denda untuk {{ $d->peminjaman->anggota->name ?? 'anggota' }} akan ditandai sudah dibayar." class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700">
+                                        <i class="fas fa-check"></i> Konfirmasi Lunas
                                     </button>
                                 </form>
-                            @else
-                                <span class="text-green-600 text-xs font-semibold">
-                                    <i class="fas fa-check-circle mr-1"></i>Terbayar
-                                </span>
-                            @endif
+                                @elseif ($statusDenda == 'belum_bayar')
+                                <span class="text-xs font-semibold text-slate-400">Menunggu aksi anggota</span>
+                                @else
+                                <span class="text-xs font-semibold text-emerald-600">Sudah terbayar</span>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-12 text-center text-gray-400">
-                            <i class="fas fa-smile text-4xl mb-3 block opacity-30"></i>
-                            Tidak ada data denda
-                        </td>
+                        <td colspan="7" class="px-6 py-12 text-center text-slate-400">Tidak ada data denda.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </div>
 @endsection

@@ -94,11 +94,18 @@
                                     title="Edit">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <button onclick="bukaModal('{{ $item->id }}', '{{ addslashes($item->judul) }}', '{{ $item->kode_buku }}')"
-                                    class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                                    title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                @if(($item->peminjaman_aktif_count ?? 0) > 0 || $item->status === 'dipinjam')
+                                    <span class="bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium cursor-not-allowed"
+                                        title="Buku sedang dipinjam atau diproses, tidak bisa dihapus">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                @else
+                                    <button onclick="bukaModal('{{ $item->id }}', '{{ addslashes($item->judul) }}', '{{ $item->kode_buku }}')"
+                                        class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+                                        title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>

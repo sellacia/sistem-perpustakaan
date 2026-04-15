@@ -1,100 +1,52 @@
-<div class="w-64 h-screen text-white flex flex-col
-bg-gradient-to-b from-blue-700 to-blue-500
-fixed top-0 left-0 z-50">
-
-    <!-- LOGO -->
-    <div class="p-5 flex items-center gap-3 border-b border-blue-400">
-        <i class="fas fa-book-open text-2xl"></i>
-        <div>
-            <h1 class="font-bold leading-4">Perpustakaan</h1>
-            <span class="text-sm">Digital</span>
+<div class="fixed left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.28),_transparent_32%),linear-gradient(180deg,_#0f172a_0%,_#111827_48%,_#172554_100%)] text-white shadow-2xl">
+    <div class="border-b border-white/10 px-6 py-6">
+        <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-lg text-cyan-200 backdrop-blur">
+                <i class="fas fa-book-open-reader"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/70">Perpustakaan</p>
+                <h1 class="mt-1 text-lg font-bold">Panel Petugas</h1>
+            </div>
         </div>
     </div>
 
-    <!-- MENU -->
-    <ul class="flex-1 p-4 space-y-2 text-sm overflow-y-auto">
+    <div class="px-4 py-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Navigasi</div>
+    <ul class="flex-1 space-y-1 overflow-y-auto px-4 pb-4 text-sm">
+        @php
+            $menus = [
+                ['label' => 'Dashboard', 'icon' => 'fa-house', 'route' => route('petugas.dashboard'), 'active' => request()->is('petugas/dashboard')],
+                ['label' => 'Kelola Buku', 'icon' => 'fa-book', 'route' => route('petugas.buku.index'), 'active' => request()->is('petugas/buku*')],
+                ['label' => 'Proses Peminjaman', 'icon' => 'fa-handshake', 'route' => route('petugas.peminjaman'), 'active' => request()->is('petugas/peminjaman*')],
+                ['label' => 'Proses Pengembalian', 'icon' => 'fa-rotate-left', 'route' => route('petugas.pengembalian'), 'active' => request()->is('petugas/pengembalian*')],
+                ['label' => 'Kelola Denda', 'icon' => 'fa-wallet', 'route' => route('petugas.denda'), 'active' => request()->is('petugas/denda*')],
+                ['label' => 'Kelola Laporan', 'icon' => 'fa-chart-column', 'route' => route('petugas.laporan'), 'active' => request()->is('petugas/laporan*')],
+                ['label' => 'Data Anggota', 'icon' => 'fa-users', 'route' => route('petugas.anggota.index'), 'active' => request()->is('petugas/anggota*')],
+            ];
+        @endphp
 
-        <!-- Dashboard -->
+        @foreach ($menus as $menu)
         <li>
-            <a href="{{ route('petugas.dashboard') }}"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/dashboard') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-home"></i>
-                Dashboard
+            <a href="{{ $menu['route'] }}" class="group flex items-center justify-between rounded-2xl px-4 py-3 transition {{ $menu['active'] ? 'bg-white text-slate-900 shadow-lg shadow-cyan-950/20' : 'text-slate-200 hover:bg-white/8 hover:text-white' }}">
+                <span class="flex items-center gap-3 font-medium">
+                    <i class="fas {{ $menu['icon'] }} {{ $menu['active'] ? 'text-sky-600' : 'text-cyan-200/80 group-hover:text-cyan-200' }}"></i>
+                    {{ $menu['label'] }}
+                </span>
+                @if($menu['active'])
+                <span class="h-2.5 w-2.5 rounded-full bg-sky-500"></span>
+                @endif
             </a>
         </li>
-
-        <!-- Kelola Buku -->
-        <li>
-            <a href="{{ route('petugas.buku.index') }}"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/buku*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-book"></i>
-                Kelola Buku
-            </a>
-        </li>
-
-        <!-- Peminjaman -->
-        <li>
-            <a href="/petugas/peminjaman"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/peminjaman*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-hand-holding"></i>
-                Proses Peminjaman
-            </a>
-        </li>
-
-        <!-- Pengembalian -->
-        <li>
-            <a href="/petugas/pengembalian"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/pengembalian*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-undo"></i>
-                Proses Pengembalian
-            </a>
-        </li>
-
-        <!-- Denda -->
-        <li>
-            <a href="/petugas/denda"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/denda*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-money-bill-wave"></i>
-                Kelola Denda
-            </a>
-        </li>
-
-        <!-- Laporan -->
-        <li>
-            <a href="/petugas/laporan"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-                {{ request()->is('petugas/laporan*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-file-alt"></i>
-                Kelola Laporan
-            </a>
-        </li>
-
-        <!-- Data Anggota -->
-        <li>
-            <a href="{{ route('petugas.anggota.index') }}"
-                class="flex items-center gap-3 p-3 rounded-lg transition
-        {{ request()->is('petugas/anggota*') ? 'bg-blue-800 text-white shadow-md' : 'hover:bg-blue-600 text-white' }}">
-                <i class="fas fa-users"></i>
-                Data Anggota
-            </a>
-        </li>
-
+        @endforeach
     </ul>
 
-    <!-- LOGOUT -->
-    <div class="p-4 border-t border-blue-400">
+    <div class="border-t border-white/10 p-4">
         <form method="POST" action="{{ route('petugas.logout') }}" class="w-full">
             @csrf
-            <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-600 text-left text-white">
-                <i class="fas fa-sign-out-alt"></i>
+            <button type="submit" data-confirm data-confirm-title="Logout sekarang?" data-confirm-message="Sesi petugas akan diakhiri dan Anda akan kembali ke halaman login." class="flex w-full items-center justify-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+                <i class="fas fa-right-from-bracket text-cyan-200"></i>
                 Logout
             </button>
         </form>
     </div>
-
 </div>

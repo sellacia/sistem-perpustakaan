@@ -1,164 +1,110 @@
 @extends('layouts.petugas.app')
 
 @section('content')
-<div class="p-6 space-y-6">
-
-    {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Kelola Laporan</h1>
-            <p class="text-sm text-gray-500 mt-1">Laporan data peminjaman buku perpustakaan</p>
-        </div>
-        <a href="{{ route('petugas.laporan.export-pdf') }}?mulai={{ request('mulai') }}&sampai={{ request('sampai') }}"
-            target="_blank"
-            class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition shadow-sm">
-            <i class="fas fa-file-pdf"></i> Cetak Laporan PDF
-        </a>
-    </div>
-
-    {{-- Filter Tanggal --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <h2 class="text-sm font-semibold text-gray-700 mb-3">
-            <i class="fas fa-filter mr-2 text-blue-500"></i>Filter Periode
-        </h2>
-        <form method="GET" action="{{ route('petugas.laporan') }}" class="flex flex-wrap items-end gap-4">
-            <div>
-                <label class="block text-xs text-gray-500 mb-1.5 font-medium">Tanggal Mulai</label>
-                <input type="date" name="mulai" value="{{ request('mulai') }}"
-                    class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-            </div>
-            <div>
-                <label class="block text-xs text-gray-500 mb-1.5 font-medium">Tanggal Selesai</label>
-                <input type="date" name="sampai" value="{{ request('sampai') }}"
-                    class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-            </div>
-            <div class="flex gap-2">
-                <button type="submit"
-                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition">
-                    <i class="fas fa-search mr-1"></i>Tampilkan
-                </button>
-                @if(request('mulai') || request('sampai'))
-                <a href="{{ route('petugas.laporan') }}"
-                    class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition">
-                    Reset
-                </a>
-                @endif
-            </div>
-        </form>
-    </div>
-
-    {{-- Info periode jika filter aktif --}}
-    @if(request('mulai') && request('sampai'))
-    <div class="flex items-center gap-2 text-sm bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl">
-        <i class="fas fa-calendar-check text-blue-500"></i>
-        Menampilkan data dari <strong>{{ \Carbon\Carbon::parse(request('mulai'))->isoFormat('D MMMM Y') }}</strong>
-        sampai <strong>{{ \Carbon\Carbon::parse(request('sampai'))->isoFormat('D MMMM Y') }}</strong>
-        – <strong>{{ $data->count() }}</strong> data ditemukan
-    </div>
-    @endif
-
-    {{-- Ringkasan --}}
+<div class="space-y-6">
     @php
         $totalDenda = $data->sum(fn($d) => $d->dendaData->jumlah_denda ?? 0);
         $selesai = $data->whereIn('status', ['selesai', 'dikembalikan'])->count();
         $terlambat = $data->where('status', 'terlambat')->count();
         $aktif = $data->whereIn('status', ['dipinjam', 'menunggu'])->count();
     @endphp
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
-            <p class="text-2xl font-bold text-gray-800">{{ $data->count() }}</p>
-            <p class="text-xs text-gray-500 mt-1">Total Transaksi</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
-            <p class="text-2xl font-bold text-green-600">{{ $selesai }}</p>
-            <p class="text-xs text-gray-500 mt-1">Selesai</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
-            <p class="text-2xl font-bold text-red-600">{{ $terlambat }}</p>
-            <p class="text-xs text-gray-500 mt-1">Terlambat</p>
-        </div>
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
-            <p class="text-xl font-bold text-orange-600">Rp {{ number_format($totalDenda, 0, ',', '.') }}</p>
-            <p class="text-xs text-gray-500 mt-1">Total Denda</p>
-        </div>
-    </div>
 
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-800">Detail Laporan</h2>
+    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">Kelola Laporan</p>
+            <h1 class="mt-3 text-3xl font-bold">Filter, rangkum, dan cetak data transaksi perpustakaan.</h1>
+            <p class="mt-3 text-sm leading-7 text-slate-300">Halaman laporan dirapikan supaya petugas mudah membaca performa transaksi sebelum mengekspor PDF.</p>
+        </div>
+        <a href="{{ route('petugas.laporan.export-pdf') }}?mulai={{ request('mulai') }}&sampai={{ request('sampai') }}" target="_blank" class="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+            <i class="fas fa-file-pdf"></i> Cetak PDF
+        </a>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900">Filter Periode</h2>
+        <p class="mt-1 text-sm text-slate-500">Pilih tanggal mulai dan selesai untuk mempersempit data laporan.</p>
+        <form method="GET" action="{{ route('petugas.laporan') }}" class="mt-5 flex flex-wrap items-end gap-4">
+            <div>
+                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Tanggal Mulai</label>
+                <input type="date" name="mulai" value="{{ request('mulai') }}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100">
+            </div>
+            <div>
+                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Tanggal Selesai</label>
+                <input type="date" name="sampai" value="{{ request('sampai') }}" class="rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100">
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700">Tampilkan</button>
+                @if(request('mulai') || request('sampai'))
+                <a href="{{ route('petugas.laporan') }}" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Reset</a>
+                @endif
+            </div>
+        </form>
+    </section>
+
+    @if(request('mulai') && request('sampai'))
+    <div class="rounded-2xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm text-sky-700 shadow-sm">
+        Menampilkan data dari {{ \Carbon\Carbon::parse(request('mulai'))->isoFormat('D MMMM Y') }} sampai {{ \Carbon\Carbon::parse(request('sampai'))->isoFormat('D MMMM Y') }}.
+    </div>
+    @endif
+
+    <section class="grid gap-4 md:grid-cols-4">
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total Transaksi</p><p class="mt-4 text-3xl font-bold text-slate-900">{{ $data->count() }}</p></article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Aktif</p><p class="mt-4 text-3xl font-bold text-sky-600">{{ $aktif }}</p></article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Terlambat</p><p class="mt-4 text-3xl font-bold text-rose-600">{{ $terlambat }}</p></article>
+        <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total Denda</p><p class="mt-4 text-2xl font-bold text-amber-600">Rp {{ number_format($totalDenda, 0, ',', '.') }}</p></article>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 px-6 py-5">
+            <h2 class="text-lg font-bold text-slate-900">Detail Laporan</h2>
+            <p class="text-sm text-slate-500">Ringkasan transaksi lengkap untuk periode yang dipilih.</p>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <tr>
-                        <th class="px-5 py-3 text-left font-semibold">No</th>
-                        <th class="px-5 py-3 text-left font-semibold">Nama Anggota</th>
-                        <th class="px-5 py-3 text-left font-semibold">Judul Buku</th>
-                        <th class="px-5 py-3 text-left font-semibold">Tgl Pinjam</th>
-                        <th class="px-5 py-3 text-left font-semibold">Wajib Kembali</th>
-                        <th class="px-5 py-3 text-left font-semibold">Tgl Kembali</th>
-                        <th class="px-5 py-3 text-center font-semibold">Status</th>
-                        <th class="px-5 py-3 text-right font-semibold">Denda</th>
+                        <th class="px-6 py-4">No</th>
+                        <th class="px-6 py-4">Anggota</th>
+                        <th class="px-6 py-4">Buku</th>
+                        <th class="px-6 py-4">Tgl Pinjam</th>
+                        <th class="px-6 py-4">Wajib Kembali</th>
+                        <th class="px-6 py-4">Tgl Kembali</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-right">Denda</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-slate-100">
                     @forelse ($data as $d)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-5 py-3 text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-5 py-3 font-medium text-gray-800">
-                            {{ $d->anggota->name ?? '-' }}
+                    <tr class="transition hover:bg-slate-50">
+                        <td class="px-6 py-4 text-slate-500">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-900">{{ $d->anggota->name ?? '-' }}</td>
+                        <td class="px-6 py-4 text-slate-700">{{ $d->buku->judul ?? '-' }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ \Carbon\Carbon::parse($d->tanggal_pinjam)->format('d M Y') }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $d->tanggal_wajib_kembali ? \Carbon\Carbon::parse($d->tanggal_wajib_kembali)->format('d M Y') : '-' }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $d->display_tanggal_kembali ? \Carbon\Carbon::parse($d->display_tanggal_kembali)->format('d M Y') : '-' }}</td>
+                        <td class="px-6 py-4 text-center">
+                            @php
+                                $badgeMap = [
+                                    'selesai' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'dikembalikan' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    'terlambat' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                    'dipinjam' => 'bg-sky-50 text-sky-700 border-sky-200',
+                                    'menunggu' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                    'ditolak' => 'bg-slate-100 text-slate-600 border-slate-200',
+                                ];
+                            @endphp
+                            <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeMap[$d->status] ?? 'bg-slate-100 text-slate-600 border-slate-200' }}">{{ ucfirst($d->status) }}</span>
                         </td>
-                        <td class="px-5 py-3 text-gray-700 max-w-[180px]">
-                            <div class="truncate" title="{{ $d->buku->judul ?? '-' }}">
-                                {{ $d->buku->judul ?? '-' }}
-                            </div>
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ \Carbon\Carbon::parse($d->tanggal_pinjam)->format('d M Y') }}
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ \Carbon\Carbon::parse($d->tanggal_wajib_kembali)->format('d M Y') }}
-                        </td>
-                        <td class="px-5 py-3 text-gray-600">
-                            {{ $d->tanggal_kembali ? \Carbon\Carbon::parse($d->tanggal_kembali)->format('d M Y') : '-' }}
-                        </td>
-                        <td class="px-5 py-3 text-center">
-                            @if ($d->status == 'selesai')
-                                <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-xs font-semibold">Selesai</span>
-                            @elseif ($d->status == 'dikembalikan')
-                                <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-full text-xs font-semibold">Dikembalikan</span>
-                            @elseif ($d->status == 'terlambat')
-                                <span class="bg-red-50 text-red-700 border border-red-200 px-2.5 py-1 rounded-full text-xs font-semibold">Terlambat</span>
-                            @elseif ($d->status == 'dipinjam')
-                                <span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full text-xs font-semibold">Dipinjam</span>
-                            @elseif ($d->status == 'menunggu')
-                                <span class="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full text-xs font-semibold">Menunggu</span>
-                            @else
-                                <span class="bg-gray-100 text-gray-600 border border-gray-200 px-2.5 py-1 rounded-full text-xs font-semibold">{{ ucfirst($d->status) }}</span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-3 text-right">
-                            @if ($d->dendaData && $d->dendaData->jumlah_denda > 0)
-                                <span class="font-semibold text-red-600">
-                                    Rp {{ number_format($d->dendaData->jumlah_denda, 0, ',', '.') }}
-                                </span>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
+                        <td class="px-6 py-4 text-right font-semibold {{ ($d->dendaData->jumlah_denda ?? 0) > 0 ? 'text-rose-600' : 'text-slate-400' }}">{{ ($d->dendaData->jumlah_denda ?? 0) > 0 ? 'Rp ' . number_format($d->dendaData->jumlah_denda, 0, ',', '.') : '-' }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-5 py-12 text-center text-gray-400">
-                            <i class="fas fa-file-alt text-4xl mb-3 block opacity-30"></i>
-                            Tidak ada data laporan
-                        </td>
+                        <td colspan="8" class="px-6 py-12 text-center text-slate-400">Tidak ada data laporan untuk periode ini.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 </div>
 @endsection

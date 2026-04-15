@@ -89,12 +89,11 @@ Route::middleware('auth')->group(function () {
         // PENGEMBALIAN
         Route::get('/pengembalian', [PetugasPengembalianController::class, 'index'])->name('petugas.pengembalian');
         Route::post('/pengembalian/{id}/konfirmasi', [PetugasPengembalianController::class, 'konfirmasi'])->name('petugas.pengembalian.konfirmasi');
-        Route::get('/petugas/peminjaman/setujui/{id}', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'setujui']);
-        Route::get('/petugas/peminjaman/tolak/{id}', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'tolak']);
 
         //  DENDA PETUGAS
         Route::get('/denda', [PetugasDendaController::class, 'index'])->name('petugas.denda');
         Route::post('/denda/bayar/{id}', [PetugasDendaController::class, 'bayar'])->name('petugas.denda.bayar');
+        Route::get('/denda/{id}/cetak', [PetugasDendaController::class, 'cetak'])->name('petugas.denda.cetak');
 
         //  LAPORAN PETUGAS
         Route::get('/laporan', [LaporanController::class, 'index'])

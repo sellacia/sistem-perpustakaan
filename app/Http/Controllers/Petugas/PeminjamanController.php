@@ -14,25 +14,36 @@ class PeminjamanController extends Controller
     {
         $today = Carbon::today();
 
-        // Auto-update status terlambat & buat denda
         $peminjamanTelat = Peminjaman::whereIn('status', ['dipinjam', 'terlambat', 'menunggu'])
             ->where('tanggal_wajib_kembali', '<', $today)
             ->whereNull('tanggal_kembali')
             ->get();
 
         foreach ($peminjamanTelat as $pinjam) {
-            $pinjam->update(['status' => 'terlambat']);
+            if ($pinjam->status === 'dipinjam' || $pinjam->status === 'terlambat') {
+                $pinjam->update(['status' => 'terlambat']);
+            }
 
-            $batas     = Carbon::parse($pinjam->tanggal_wajib_kembali);
-            $terlambat = (int) $batas->diffInDays($today);
+            $hasilDenda = $pinjam->hitungDenda($today);
+            $terlambat = $hasilDenda['terlambat'];
 
             if ($terlambat > 0) {
+                $statusDendaSaatIni = in_array($pinjam->status_denda, ['menunggu_konfirmasi', 'sudah_bayar'], true)
+                    ? $pinjam->status_denda
+                    : ($pinjam->dendaData->status ?? $pinjam->status_denda ?? 'belum_bayar');
+
+                $pinjam->update([
+                    'terlambat' => $terlambat,
+                    'denda' => $hasilDenda['jumlah_denda'],
+                    'status_denda' => $statusDendaSaatIni,
+                ]);
+
                 Denda::updateOrCreate(
                     ['peminjaman_id' => $pinjam->id],
                     [
                         'terlambat'    => $terlambat,
-                        'jumlah_denda' => $terlambat * 2000,
-                        'status'       => 'belum_bayar',
+                        'jumlah_denda' => $hasilDenda['jumlah_denda'],
+                        'status'       => $statusDendaSaatIni,
                     ]
                 );
             }
@@ -47,6 +58,18 @@ class PeminjamanController extends Controller
         $pinjam = Peminjaman::findOrFail($id);
         $buku   = Buku::find($pinjam->buku_id);
 
+        if ($pinjam->status !== 'menunggu') {
+            return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
+        }
+
+        $pinjamanAktifAnggota = Peminjaman::where('anggota_id', $pinjam->anggota_id)
+            ->borrowingInProgress()
+            ->count();
+
+        if ($pinjamanAktifAnggota > 3) {
+            return back()->with('error', 'Anggota ini sudah mencapai batas maksimal 3 buku aktif.');
+        }
+
         if ($buku && $buku->stok <= 0) {
             return back()->with('error', 'Stok buku habis!');
         }
@@ -54,7 +77,10 @@ class PeminjamanController extends Controller
         $pinjam->update([
             'status'               => 'dipinjam',
             'tanggal_wajib_kembali' => now()->addDays(7),
+            'tanggal_kembali'      => null,
         ]);
+
+        $buku?->syncStatus();
 
         return back()->with('success', 'Peminjaman disetujui!');
     }
@@ -62,12 +88,18 @@ class PeminjamanController extends Controller
     public function tolak($id)
     {
         $pinjam = Peminjaman::findOrFail($id);
+
+        if ($pinjam->status !== 'menunggu') {
+            return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
+        }
+
         $pinjam->update(['status' => 'ditolak']);
 
         // Kembalikan stok karena stok dikurangi saat pengajuan
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
             $buku->increment('stok');
+            $buku->refresh()->syncStatus();
         }
 
         return back()->with('success', 'Peminjaman ditolak!');
@@ -82,27 +114,23 @@ class PeminjamanController extends Controller
         }
 
         $today = Carbon::today();
-        $wajib = Carbon::parse($pinjam->tanggal_wajib_kembali);
-
-        $terlambat = 0;
-        $jumlahDenda = 0;
-
-        if ($today->gt($wajib)) {
-            $terlambat   = (int) $wajib->diffInDays($today);
-            $jumlahDenda = $terlambat * 2000;
-        }
+        $hasilDenda = $pinjam->hitungDenda($today);
+        $terlambat = $hasilDenda['terlambat'];
+        $jumlahDenda = $hasilDenda['jumlah_denda'];
 
         $pinjam->update([
             'status'          => 'dikembalikan',
             'tanggal_kembali' => $today,
             'terlambat'       => $terlambat,
             'denda'           => $jumlahDenda,
+            'status_denda'    => $jumlahDenda > 0 ? 'belum_bayar' : 'sudah_bayar',
         ]);
 
         // Kembalikan stok
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
             $buku->increment('stok');
+            $buku->refresh()->syncStatus();
         }
 
         // Simpan denda jika ada
@@ -115,6 +143,8 @@ class PeminjamanController extends Controller
                     'status'       => 'belum_bayar',
                 ]
             );
+        } else {
+            Denda::where('peminjaman_id', $pinjam->id)->delete();
         }
 
         return back()->with('success', 'Buku berhasil dikembalikan!');

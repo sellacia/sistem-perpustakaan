@@ -10,7 +10,7 @@ class BukuController extends Controller
 {
     public function index()
     {
-        $buku = Buku::latest()->get();
+        $buku = Buku::withCount('peminjamanAktif')->latest()->get();
         return view('petugas.buku.index', compact('buku'));
     }
 
@@ -86,6 +86,11 @@ class BukuController extends Controller
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);
+
+        if ($buku->peminjamanAktif()->exists() || $buku->status === 'dipinjam') {
+            return redirect('/petugas/buku')->with('error', 'Buku tidak bisa dihapus karena masih sedang dipinjam atau masih dalam proses pengembalian.');
+        }
+
         $buku->delete();
 
         return redirect('/petugas/buku')->with('success', 'Buku berhasil dihapus!');

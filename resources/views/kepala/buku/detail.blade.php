@@ -1,48 +1,11 @@
 @extends('layouts.kepala.app')
 
 @section('content')
-    <h2 class="text-xl font-bold text-blue-600 mb-6">Daftar Buku</h2>
-
-    <div class="bg-white p-6 rounded-xl shadow-md flex gap-6">
-
-        <!-- COVER -->
-        <div class="w-40 aspect-[3/4] overflow-hidden rounded-lg">
-            @if ($buku->cover)
-                <img src="{{ asset('assets/images/' . $buku->cover) }}" class="w-full h-full object-cover">
-            @else
-                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                    Tidak ada gambar
-                </div>
-            @endif
-        </div>
-
-        <!-- DETAIL -->
-        <div class="flex-1 text-sm">
-
-            <p><b>Kode Buku :</b> {{ $buku->kode_buku }}</p>
-            <p><b>Pengarang :</b>
-                <span class="text-blue-600">{{ $buku->pengarang }}</span>
-            </p>
-            <p><b>Penerbit :</b>
-                <span class="text-blue-600">{{ $buku->penerbit }}</span>
-            </p>
-            <p><b>Tahun :</b>
-                <span class="text-blue-600">{{ $buku->tahun }}</span>
-            </p>
-
-            <p class="mt-3"><b>Deskripsi :</b></p>
-            <p class="text-gray-700 leading-relaxed">
-                {{ $buku->deskripsi ?? 'Tidak ada deskripsi' }}
-            </p>
-
-            <!-- BUTTON -->
-            <div class="mt-6 text-right">
-                <a href="/kepala/buku" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Kembali
-                </a>
-            </div>
-
-        </div>
-
+<div class="mx-auto max-w-5xl space-y-6">
+    <div class="flex items-center justify-between gap-4"><div><p class="text-sm font-semibold uppercase tracking-[0.2em] text-sky-600">Detail Buku</p><h1 class="mt-2 text-3xl font-bold text-slate-900">{{ $buku->judul }}</h1><p class="mt-2 text-sm text-slate-500">Informasi detail buku untuk kebutuhan monitoring kepala perpustakaan.</p></div><a href="{{ route('kepala.buku.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"><i class="fas fa-arrow-left"></i> Kembali</a></div>
+    <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"><div class="aspect-[4/5] overflow-hidden bg-slate-100">@if($buku->cover)<img src="{{ asset('assets/images/' . $buku->cover) }}" class="h-full w-full object-cover">@else<div class="flex h-full items-center justify-center text-slate-400">Tidak ada gambar</div>@endif</div></div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div class="flex items-center gap-3"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $buku->kode_buku }}</span><span class="rounded-full {{ $buku->stok > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }} px-3 py-1 text-xs font-semibold">{{ $buku->status }}</span></div><div class="mt-6 grid gap-4 md:grid-cols-2"><div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Pengarang</p><p class="mt-2 font-semibold text-slate-900">{{ $buku->pengarang }}</p></div><div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Penerbit</p><p class="mt-2 font-semibold text-slate-900">{{ $buku->penerbit }}</p></div><div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Tahun</p><p class="mt-2 font-semibold text-slate-900">{{ $buku->tahun }}</p></div><div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Stok</p><p class="mt-2 font-semibold text-slate-900">{{ $buku->stok }} buku</p></div></div><div class="mt-5 rounded-2xl bg-slate-50 p-4"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Deskripsi</p><p class="mt-2 text-sm leading-7 text-slate-600">{{ $buku->deskripsi ?? 'Tidak ada deskripsi.' }}</p></div></div>
     </div>
+</div>
 @endsection

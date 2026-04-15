@@ -1,128 +1,64 @@
 @extends('layouts.anggota.app')
 
 @section('content')
-    <div class="p-6">
-
-        <!-- SEARCH -->
-        <div class="bg-white p-4 rounded-xl shadow mb-6">
-            <form method="GET" action="{{ route('anggota.buku') }}">
-                <div class="flex items-center bg-gray-100 px-4 py-2 rounded-lg">
-                    <input type="text" name="search" placeholder="Cari Daftar Buku"
-                        class="bg-transparent outline-none w-full" value="{{ request('search') }}">
-                </div>
-            </form>
+<div class="space-y-6">
+    <section class="flex flex-col gap-4 rounded-[32px] bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-700 px-6 py-8 text-white shadow-xl lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100">Katalog Buku</p>
+            <h1 class="mt-3 text-3xl font-bold">Temukan buku yang siap Anda pinjam.</h1>
+            <p class="mt-3 text-sm leading-7 text-cyan-50/90">Halaman katalog dibuat lebih rapi agar pencarian buku, detail, dan pengajuan pinjam terasa lebih nyaman.</p>
         </div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm backdrop-blur-sm">
+            <p class="text-xs uppercase tracking-[0.18em] text-cyan-100/70">Buku Tersedia</p>
+            <p class="mt-2 text-2xl font-bold">{{ count($buku) }}</p>
+        </div>
+    </section>
 
-        <!-- CONTAINER -->
-        <div class="bg-gray-100 p-6 rounded-2xl">
+    @if(session('success'))<div data-auto-dismiss class="transform rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700 shadow-sm transition duration-300"><div class="flex items-center gap-3"><i class="fas fa-circle-check"></i><span>{{ session('success') }}</span></div></div>@endif
+    @if(session('error'))<div data-auto-dismiss class="transform rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 shadow-sm transition duration-300"><div class="flex items-center gap-3"><i class="fas fa-circle-exclamation"></i><span>{{ session('error') }}</span></div></div>@endif
 
-            <!-- GRID -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <form method="GET" action="{{ route('anggota.buku') }}" class="relative">
+            <i class="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="search" placeholder="Cari judul, pengarang, atau kode buku..." value="{{ request('search') }}" class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100">
+        </form>
+    </section>
 
-                @foreach ($buku as $item)
-                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col">
-
-                        <!-- COVER -->
-                        <div class="w-full aspect-[3/4] overflow-hidden rounded-xl mb-4">
-                            <img src="{{ $item->cover ? asset('assets/images/' . $item->cover) : 'https://via.placeholder.com/300x500' }}"
-                                class="w-full h-full object-cover">
-                        </div>
-
-                        <!-- INFO -->
-                        <h3 class="text-blue-600 font-semibold text-base mb-2">
-                            {{ $item->judul }}
-                        </h3>
-
-                        <div class="text-sm text-gray-700 space-y-1 flex-1">
-                            <p><b>Kode:</b> {{ $item->kode_buku }}</p>
-                            <p><b>Pengarang:</b> {{ $item->pengarang }}</p>
-                            <p><b>Penerbit:</b> {{ $item->penerbit }}</p>
-                            <p><b>Tahun:</b> {{ $item->tahun }}</p>
-                            <p><b>Stok:</b> {{ $item->stok }} Buku</p>
-
-                            <p><b>Status:</b>
-                                @if ($item->stok > 0)
-                                    <span class="text-green-600 font-semibold">Tersedia</span>
-                                @else
-                                    <span class="text-red-500 font-semibold">Tidak Tersedia</span>
-                                @endif
-                            </p>
-                        </div>
-
-                        <!-- BUTTON -->
-                        <div class="flex gap-2 mt-5">
-
-                            <a href="{{ route('anggota.buku.detail', $item->id) }}"
-                                class="flex-1 text-center bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                                Selengkapnya
-                            </a>
-
-                            @if ($item->stok > 0)
-                                <form action="{{ route('anggota.pinjam', $item->id) }}" method="POST"
-                                    class="flex-1 form-pinjam">
-                                    @csrf
-                                    <button type="button"
-                                        class="w-full btn-pinjam bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">
-                                        Pinjam
-                                    </button>
-                                </form>
-                            @else
-                                <button disabled class="flex-1 bg-gray-400 text-white py-2 rounded-lg">
-                                    Tidak Tersedia
-                                </button>
-                            @endif
-
-                        </div>
-
-                    </div>
-                @endforeach
-                @php
-                    $total = count($buku);
-                @endphp
-                @for ($i = $total; $i < 3; $i++)
-                    <div class="bg-white p-5 rounded-xl shadow opacity-40 text-center">
-                        <div class="h-48 bg-gray-200 rounded mb-4"></div>
-                        <p class="text-gray-400 text-sm">Belum ada buku</p>
-                    </div>
-                @endfor
-
+    <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        @forelse ($buku as $item)
+        <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+            <div class="aspect-[4/5] overflow-hidden bg-slate-100">
+                <img src="{{ $item->cover ? asset('assets/images/' . $item->cover) : 'https://via.placeholder.com/300x500' }}" class="h-full w-full object-cover">
             </div>
-
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const pinjamButtons = document.querySelectorAll('.btn-pinjam');
-                pinjamButtons.forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const form = this.closest('.form-pinjam');
-
-                        Swal.fire({
-                            title: 'Konfirmasi Peminjaman',
-                            text: 'Apakah Anda yakin ingin meminjam buku ini? Data akan segera diteruskan ke petugas.',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Ya, Pinjam',
-                            cancelButtonText: 'Batal',
-                            background: '#ffffff',
-                            color: '#1e3a8a', // Dark blue text
-                            confirmButtonColor: '#2563eb', // Blue-600
-                            cancelButtonColor: '#9ca3af', // Gray-400
-                            customClass: {
-                                popup: 'rounded-2xl border border-blue-100 shadow-xl',
-                                title: 'text-xl font-bold text-blue-700',
-                                confirmButton: 'rounded-lg px-6 py-2 font-semibold',
-                                cancelButton: 'rounded-lg px-6 py-2 font-semibold'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                form.submit();
-                            }
-                        });
-                    });
-                });
-            });
-        </script>
-    @endsection
+            <div class="p-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">{{ $item->judul }}</h3>
+                        <p class="mt-1 text-sm text-slate-500">{{ $item->pengarang }}</p>
+                    </div>
+                    <span class="rounded-full {{ $item->stok > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }} px-3 py-1 text-xs font-semibold">{{ $item->stok > 0 ? 'Tersedia' : 'Kosong' }}</span>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
+                    <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Kode</p><p class="mt-1 font-semibold text-slate-800">{{ $item->kode_buku }}</p></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Stok</p><p class="mt-1 font-semibold text-slate-800">{{ $item->stok }} buku</p></div>
+                    <div class="col-span-2 rounded-2xl bg-slate-50 p-3"><p class="text-xs uppercase tracking-[0.16em] text-slate-400">Penerbit</p><p class="mt-1 font-semibold text-slate-800">{{ $item->penerbit }}</p></div>
+                </div>
+                <div class="mt-5 flex gap-2">
+                    <a href="{{ route('anggota.buku.detail', $item->id) }}" class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Detail</a>
+                    @if ($item->stok > 0)
+                    <form action="{{ route('anggota.pinjam', $item->id) }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" data-confirm data-confirm-title="Ajukan peminjaman?" data-confirm-message="Pengajuan buku {{ $item->judul }} akan dikirim ke petugas untuk diproses." class="w-full rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700">Pinjam</button>
+                    </form>
+                    @else
+                    <button disabled class="flex-1 rounded-2xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-500">Tidak Tersedia</button>
+                    @endif
+                </div>
+            </div>
+        </article>
+        @empty
+        <div class="col-span-full rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-400 shadow-sm">Belum ada buku yang cocok dengan pencarian Anda.</div>
+        @endforelse
+    </section>
+</div>
+@endsection

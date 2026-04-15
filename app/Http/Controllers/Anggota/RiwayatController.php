@@ -21,28 +21,25 @@ class RiwayatController extends Controller
             ->get();
 
         foreach ($peminjamanDipinjam as $pinjam) {
-            $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
-            if ($today->gt($batas)) {
+            $hasilDenda = $pinjam->hitungDenda($today);
+
+            if ($hasilDenda['terlambat'] > 0) {
                 $pinjam->update(['status' => 'terlambat']);
 
-                $terlambat = (int) $batas->diffInDays($today);
-                if ($terlambat > 0) {
-                    Denda::updateOrCreate(
-                        ['peminjaman_id' => $pinjam->id],
-                        [
-                            'terlambat'    => $terlambat,
-                            'jumlah_denda' => $terlambat * 2000,
-                            'status'       => 'belum_bayar',
-                        ]
-                    );
-                }
+                Denda::updateOrCreate(
+                    ['peminjaman_id' => $pinjam->id],
+                    [
+                        'terlambat'    => $hasilDenda['terlambat'],
+                        'jumlah_denda' => $hasilDenda['jumlah_denda'],
+                        'status'       => 'belum_bayar',
+                    ]
+                );
             }
         }
 
-        // Ambil SEMUA riwayat peminjaman user ini (exclude yang sudah selesai)
         $data = Peminjaman::with(['buku', 'dendaData'])
             ->where('anggota_id', $userId)
-            ->whereIn('status', ['dipinjam', 'dikembalikan', 'terlambat', 'ditolak', 'menunggu'])
+            ->whereIn('status', ['dipinjam', 'dikembalikan', 'terlambat', 'ditolak', 'menunggu', 'selesai'])
             ->latest()
             ->get();
 
@@ -51,10 +48,21 @@ class RiwayatController extends Controller
 
     public function bayar($id)
     {
-        $denda = Denda::findOrFail($id);
-        $denda->status = 'sudah_bayar';
-        $denda->save();
+        $denda = Denda::whereHas('peminjaman', function ($query) {
+            $query->where('anggota_id', Auth::id());
+        })->findOrFail($id);
 
-        return redirect()->route('anggota.riwayat')->with('success', 'Denda berhasil dibayar! Menunggu konfirmasi petugas.');
+        if ($denda->status === 'sudah_bayar') {
+            return redirect()->route('anggota.riwayat')->with('success', 'Denda ini sudah ditandai lunas.');
+        }
+
+        if ($denda->status === 'menunggu_konfirmasi') {
+            return redirect()->route('anggota.riwayat')->with('success', 'Permintaan konfirmasi pembayaran sudah pernah dikirim.');
+        }
+
+        $denda->update(['status' => 'menunggu_konfirmasi']);
+        $denda->peminjaman?->update(['status_denda' => 'menunggu_konfirmasi']);
+
+        return redirect()->route('anggota.riwayat')->with('success', 'Permintaan pembayaran sudah dicatat. Silakan hubungi petugas untuk konfirmasi pelunasan.');
     }
 }

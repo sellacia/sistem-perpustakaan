@@ -34,35 +34,35 @@ class PengembalianController extends Controller
         }
 
         $kembali = Carbon::today();
-        $batas = Carbon::parse($pinjam->tanggal_wajib_kembali);
+        $hasilDenda = $pinjam->hitungDenda($kembali);
+        $terlambat = $hasilDenda['terlambat'];
+        $denda = $hasilDenda['jumlah_denda'];
 
-        $terlambat = 0;
-        $denda = 0;
-
-        if ($kembali->gt($batas)) {
-            $terlambat = $kembali->diffInDays($batas);
-            $denda = $terlambat * 2000;  // Ubah dari 1000 menjadi 2000 agar konsisten
-
-            if ($denda > 0) {
-                \App\Models\Denda::updateOrCreate(
-                    ['peminjaman_id' => $pinjam->id],
-                    [
-                        'terlambat' => $terlambat,
-                        'jumlah_denda' => $denda,
-                        'status' => 'belum_bayar'
-                    ]
-                );
-            }
+        if ($denda > 0) {
+            \App\Models\Denda::updateOrCreate(
+                ['peminjaman_id' => $pinjam->id],
+                [
+                    'terlambat' => $terlambat,
+                    'jumlah_denda' => $denda,
+                    'status' => 'belum_bayar'
+                ]
+            );
+        } else {
+            \App\Models\Denda::where('peminjaman_id', $pinjam->id)->delete();
         }
 
         $pinjam->update([
             'status' => 'dikembalikan',
-            'tanggal_kembali' => $kembali
+            'tanggal_kembali' => $kembali,
+            'terlambat' => $terlambat,
+            'denda' => $denda,
+            'status_denda' => $denda > 0 ? 'belum_bayar' : 'sudah_bayar',
         ]);
 
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
             $buku->increment('stok');
+            $buku->refresh()->syncStatus();
         }
 
         return back()->with('success', 'Pengembalian berhasil!');

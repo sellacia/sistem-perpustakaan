@@ -32,4 +32,19 @@ class Buku extends Model
     {
         return $this->hasMany(\App\Models\Peminjaman::class, 'buku_id');
     }
+
+    public function peminjamanAktif()
+    {
+        return $this->hasMany(\App\Models\Peminjaman::class, 'buku_id')
+            ->whereIn('status', ['menunggu', 'dipinjam', 'terlambat', 'dikembalikan']);
+    }
+
+    public function syncStatus(): void
+    {
+        $statusBaru = $this->peminjamanAktif()->exists() || $this->stok <= 0 ? 'dipinjam' : 'tersedia';
+
+        if ($this->status !== $statusBaru) {
+            $this->forceFill(['status' => $statusBaru])->save();
+        }
+    }
 }

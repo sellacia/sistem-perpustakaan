@@ -22,6 +22,11 @@ class PeminjamanController extends Controller
     public function store(Request $request, $id)
     {
         $buku = Buku::findOrFail($id);
+        $anggotaId = Auth::id();
+
+        $pinjamanAktif = Peminjaman::where('anggota_id', $anggotaId)
+            ->borrowingInProgress()
+            ->count();
 
         // CEK STOK
         if ($buku->stok <= 0) {
@@ -29,18 +34,34 @@ class PeminjamanController extends Controller
                 ->with('error', 'Stok buku habis!');
         }
 
+        if ($pinjamanAktif >= 3) {
+            return redirect()->route('anggota.buku')
+                ->with('error', 'Maksimal peminjaman hanya 3 buku aktif dalam waktu bersamaan.');
+        }
+
+        $sudahMengajukanBukuIni = Peminjaman::where('anggota_id', $anggotaId)
+            ->where('buku_id', $id)
+            ->borrowingInProgress()
+            ->exists();
+
+        if ($sudahMengajukanBukuIni) {
+            return redirect()->route('anggota.buku')
+                ->with('error', 'Buku ini sudah ada dalam daftar pinjaman aktif Anda.');
+        }
+
         // SIMPAN (status masih menunggu)
         Peminjaman::create([
             'nama' => Auth::user()->nama ?? Auth::user()->name,
-            'anggota_id' => Auth::id(), //  INI PENTING
+            'anggota_id' => $anggotaId,
             'buku_id' => $id,
             'tanggal_pinjam' => now(),
-            'tanggal_wajib_kembali' => now()->addDays(3),
+            'tanggal_wajib_kembali' => now()->addDays(7),
             'status' => 'menunggu'
         ]);
 
         // Kurangi stok seketika saat diajukan agar tidak dipinjam anggota lain secara bersamaan
         $buku->decrement('stok');
+        $buku->refresh()->syncStatus();
 
         return redirect()->route('anggota.buku')
             ->with('success', 'Pengajuan peminjaman berhasil!');
