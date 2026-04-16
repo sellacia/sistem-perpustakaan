@@ -13,9 +13,9 @@ class PeminjamanController extends Controller
     public function index()
     {
         $peminjaman = Peminjaman::with('buku')
-                        ->where('anggota_id', Auth::id())
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+            ->where('anggota_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('anggota.peminjaman.index', compact('peminjaman'));
     }
 
@@ -59,9 +59,7 @@ class PeminjamanController extends Controller
             'status' => 'menunggu'
         ]);
 
-        // Kurangi stok seketika saat diajukan agar tidak dipinjam anggota lain secara bersamaan
-        $buku->decrement('stok');
-        $buku->refresh()->syncStatus();
+        // DIHAPUS: tidak mengurangi stok di sini
 
         return redirect()->route('anggota.buku')
             ->with('success', 'Pengajuan peminjaman berhasil!');

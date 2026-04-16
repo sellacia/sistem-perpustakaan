@@ -42,13 +42,33 @@
 
                         {{-- HOVER --}}
                         <div
-                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                            <a href="{{ route('kepala.buku.show', $item->id) }}"
-                                class="w-10 h-10 bg-white text-blue-600 rounded-full flex items-center justify-center shadow hover:bg-blue-50">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </div>
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition">
 
+                            <!-- WRAPPER ICON -->
+                            <div class="relative group/icon flex flex-col items-center">
+
+                                <!-- ICON -->
+                                <a href="{{ route('kepala.buku.show', $item->id) }}"
+                                    class="w-9 h-9 bg-white text-indigo-600 rounded-full flex items-center justify-center hover:scale-110 transition">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <!-- TOOLTIP -->
+                                <div
+                                    class="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/icon:opacity-100 transition">
+
+                                    <!-- Panah -->
+                                    <div class="w-2 h-2 bg-gray-800 rotate-45 mx-auto mb-[-4px]"></div>
+
+                                    <!-- Box -->
+                                    <div class="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow whitespace-nowrap">
+                                        Detail
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
                     </div>
 
                     {{-- CONTENT --}}

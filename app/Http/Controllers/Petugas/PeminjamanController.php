@@ -80,22 +80,47 @@ class PeminjamanController extends Controller
             'tanggal_kembali'      => null,
         ]);
 
-        $buku?->syncStatus();
+        //  TAMBAHAN (INI DOANG YANG DIUBAH)
+        if ($buku) {
+            $buku->decrement('stok');
+            $buku->refresh()->syncStatus();
+        }
 
         return back()->with('success', 'Peminjaman disetujui!');
     }
-
     public function tolak($id)
     {
-        $pinjam = Peminjaman::findOrFail($id);
+        $pinjam = Peminjaman::with('dendaData')->findOrFail($id);
 
         if ($pinjam->status !== 'menunggu') {
             return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
         }
 
-        $pinjam->update(['status' => 'ditolak']);
+        $alasan = [];
 
-        // Kembalikan stok karena stok dikurangi saat pengajuan
+        // CEK: masih pinjam buku lain
+        $masihPinjam = Peminjaman::where('anggota_id', $pinjam->anggota_id)
+            ->where('status', 'dipinjam')
+            ->exists();
+
+        if ($masihPinjam) {
+            $alasan[] = 'Masih memiliki buku yang belum dikembalikan';
+        }
+
+        //  CEK: ada denda
+        if ($pinjam->dendaData && $pinjam->dendaData->jumlah > 0) {
+            $alasan[] = 'Memiliki tunggakan denda';
+        }
+
+        $alasanText = implode(', ', $alasan);
+
+        //  update
+        $pinjam->update([
+            'status' => 'ditolak',
+            'alasan_tolak' => $alasanText ?: 'Tidak memenuhi syarat'
+        ]);
+
+        //  balikin stok
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
             $buku->increment('stok');
@@ -147,6 +172,7 @@ class PeminjamanController extends Controller
             Denda::where('peminjaman_id', $pinjam->id)->delete();
         }
 
-        return back()->with('success', 'Buku berhasil dikembalikan!');
+        return redirect()->route('petugas.pengembalian')
+            ->with('success', 'Buku dikembalikan & denda masuk ke kelola denda');
     }
 }

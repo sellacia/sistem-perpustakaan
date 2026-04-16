@@ -20,6 +20,8 @@ use App\Http\Controllers\Petugas\PengembalianController as PetugasPengembalianCo
 use App\Http\Controllers\Petugas\AnggotaController;
 use App\Http\Controllers\Petugas\DendaController as PetugasDendaController;
 use App\Http\Controllers\Petugas\LaporanController;
+use App\Http\Controllers\Petugas\PengembalianController;
+
 
 // ===== KEPALA =====
 use App\Http\Controllers\Kepala\DashboardController;
@@ -84,7 +86,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/peminjaman', [PetugasPeminjaman::class, 'index'])->name('petugas.peminjaman');
         Route::get('/peminjaman/setujui/{id}', [PetugasPeminjaman::class, 'setujui'])->name('petugas.peminjaman.setujui');
         Route::get('/peminjaman/tolak/{id}', [PetugasPeminjaman::class, 'tolak'])->name('petugas.peminjaman.tolak');
-        Route::get('/peminjaman/kembalikan/{id}', [PetugasPeminjaman::class, 'kembalikan'])->name('petugas.peminjaman.kembalikan');
+Route::put('/petugas/peminjaman/{id}/kembalikan',
+    [PengembalianController::class, 'kembalikan']
+)->name('petugas.peminjaman.kembalikan');
 
         // PENGEMBALIAN
         Route::get('/pengembalian', [PetugasPengembalianController::class, 'index'])->name('petugas.pengembalian');

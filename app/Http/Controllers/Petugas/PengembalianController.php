@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
+use Illuminate\Http\Request;
 
 class PengembalianController extends Controller
 {
@@ -63,5 +64,26 @@ class PengembalianController extends Controller
         }
 
         return back()->with('success', 'Pengembalian dikonfirmasi!');
+    }
+    public function kembalikan(Request $request, $id)
+    {
+        $pinjam = Peminjaman::findOrFail($id);
+
+        $denda = 0;
+
+        if ($request->kondisi == 'rusak') {
+            $denda = 50000;
+        } elseif ($request->kondisi == 'hilang') {
+            $denda = 100000;
+        }
+
+        $pinjam->update([
+            'kondisi' => $request->kondisi,
+            'tanggal_kembali' => now(),
+            'status' => 'dikembalikan'
+        ]);
+
+        return redirect()->route('petugas.pengembalian')
+            ->with('success', 'Berhasil dikembalikan');
     }
 }
