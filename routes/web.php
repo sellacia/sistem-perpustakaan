@@ -86,12 +86,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/peminjaman', [PetugasPeminjaman::class, 'index'])->name('petugas.peminjaman');
         Route::get('/peminjaman/setujui/{id}', [PetugasPeminjaman::class, 'setujui'])->name('petugas.peminjaman.setujui');
         Route::get('/peminjaman/tolak/{id}', [PetugasPeminjaman::class, 'tolak'])->name('petugas.peminjaman.tolak');
-Route::put('/petugas/peminjaman/{id}/kembalikan',
-    [PengembalianController::class, 'kembalikan']
-)->name('petugas.peminjaman.kembalikan');
 
         // PENGEMBALIAN
         Route::get('/pengembalian', [PetugasPengembalianController::class, 'index'])->name('petugas.pengembalian');
+        Route::post('/pengembalian/{id}/kembalikan', [PetugasPengembalianController::class, 'kembalikan'])->name('petugas.pengembalian.kembalikan');
         Route::post('/pengembalian/{id}/konfirmasi', [PetugasPengembalianController::class, 'konfirmasi'])->name('petugas.pengembalian.konfirmasi');
 
         //  DENDA PETUGAS

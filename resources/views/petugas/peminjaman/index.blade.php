@@ -116,67 +116,86 @@
         </section>
     </div>
 
-    {{-- 🔥 MODAL --}}
-    <div id="modalKembali" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl w-80">
-
-            <h2 class="font-bold mb-4">Kondisi Buku</h2>
+    {{-- MODAL KONDISI BUKU --}}
+    <div id="modalKembali" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-96 shadow-2xl">
+            <div class="px-6 py-4 border-b">
+                <h2 class="font-bold text-slate-800 text-lg">🔁 Proses Pengembalian Buku</h2>
+                <p class="text-xs text-slate-500 mt-1">Pilih kondisi fisik buku yang dikembalikan.</p>
+            </div>
 
             <form id="formKembali" method="POST">
                 @csrf
-                @method('PUT')
 
-                <select name="kondisi" id="kondisi" class="w-full border px-3 py-2 rounded mb-3">
-                    <option value="baik">Baik</option>
-                    <option value="rusak">Rusak</option>
-                    <option value="hilang">Hilang</option>
-                </select>
+                <div class="px-6 py-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kondisi Buku</label>
+                        <select name="kondisi" id="kondisi" class="w-full border border-slate-300 px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <option value="baik">✅ Baik (tidak ada denda tambahan)</option>
+                            <option value="rusak">⚠️ Rusak (+Rp 50.000)</option>
+                            <option value="hilang">❌ Hilang (+Rp 100.000)</option>
+                        </select>
+                    </div>
 
-                <input type="text" id="denda" readonly class="w-full border px-3 py-2 rounded mb-3 bg-gray-100">
+                    <div class="bg-slate-50 rounded-xl px-4 py-3 text-sm">
+                        <p class="text-slate-500 text-xs uppercase tracking-wide mb-1">Denda Tambahan Kondisi</p>
+                        <p id="dendaKondisiLabel" class="font-bold text-slate-800">Rp 0</p>
+                    </div>
 
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal()" class="bg-gray-300 px-3 py-1 rounded">
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
+                        <i class="fas fa-info-circle"></i>
+                        Denda keterlambatan dihitung otomatis dari selisih tanggal.
+                        Denda kondisi ditambahkan di atas denda keterlambatan.
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200">
                         Batal
                     </button>
-
-                    <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded">
-                        Simpan
+                    <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">
+                        Simpan Pengembalian
                     </button>
                 </div>
             </form>
-
         </div>
     </div>
 @endsection
 
-{{-- SCRIPT --}}
 <script>
     function openModal(id) {
         const modal = document.getElementById('modalKembali');
-        const form = document.getElementById('formKembali');
+        const form  = document.getElementById('formKembali');
 
-        form.action = `/petugas/peminjaman/${id}/kembalikan`;
+        // Route: POST /petugas/pengembalian/{id}/kembalikan
+        form.action = `/petugas/pengembalian/${id}/kembalikan`;
+
+        // Reset dropdown & label
+        document.getElementById('kondisi').value = 'baik';
+        document.getElementById('dendaKondisiLabel').textContent = 'Rp 0';
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
     function closeModal() {
-        document.getElementById('modalKembali').classList.add('hidden');
+        const modal = document.getElementById('modalKembali');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
-    // AUTO DENDA
-    document.addEventListener('DOMContentLoaded', function() {
-        const kondisi = document.getElementById('kondisi');
-        const denda = document.getElementById('denda');
+    document.addEventListener('DOMContentLoaded', function () {
+        const kondisiSelect = document.getElementById('kondisi');
+        const dendaLabel    = document.getElementById('dendaKondisiLabel');
 
-        kondisi.addEventListener('change', function() {
+        kondisiSelect.addEventListener('change', function () {
             let nilai = 0;
-
-            if (this.value === 'rusak') nilai = 50000;
+            if (this.value === 'rusak')  nilai = 50000;
             if (this.value === 'hilang') nilai = 100000;
 
-            denda.value = 'Rp ' + nilai.toLocaleString('id-ID');
+            dendaLabel.textContent = 'Rp ' + nilai.toLocaleString('id-ID');
         });
     });
 </script>

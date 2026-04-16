@@ -154,8 +154,20 @@
                 </tr>
                 <tr>
                     <td class="label">Keterlambatan</td>
-                    <td class="value">{{ $denda->terlambat }} hari</td>
+                    <td class="value">
+                        {{ $denda->terlambat }} hari 
+                        <span style="color: #64748b; font-size: 10px;">(Rp {{ number_format($denda->terlambat * 2000, 0, ',', '.') }})</span>
+                    </td>
                 </tr>
+                @if($denda->peminjaman->kondisi && in_array($denda->peminjaman->kondisi, ['rusak', 'hilang']))
+                <tr>
+                    <td class="label">Denda Kondisi</td>
+                    <td class="value" style="color: #c2410c;">
+                        Buku {{ ucfirst($denda->peminjaman->kondisi) }} 
+                        <span style="font-size: 10px;">(+Rp {{ number_format($denda->jumlah_denda - ($denda->terlambat * 2000), 0, ',', '.') }})</span>
+                    </td>
+                </tr>
+                @endif
                 <tr>
                     <td class="label">Status</td>
                     <td class="value">

@@ -11,60 +11,76 @@ use Illuminate\Support\Facades\Auth;
 
 class PengembalianController extends Controller
 {
+    /**
+     * Tampilkan daftar buku yang sedang dipinjam oleh anggota.
+     */
     public function index()
     {
         $pinjam = Peminjaman::with('buku')
             ->where('anggota_id', Auth::id())
-            ->whereIn('status', ['dipinjam', 'terlambat'])  // Include terlambat juga
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->get();
 
         return view('anggota.pengembalian.index', compact('pinjam'));
     }
 
+    /**
+     * Anggota mengajukan pengembalian buku.
+     * Kondisi buku default 'baik' — petugas yang nanti update kondisi saat menerima buku fisik.
+     */
     public function proses(Request $request)
     {
         $request->validate([
-            'pinjam_id' => 'required'
+            'pinjam_id' => 'required|integer',
         ]);
 
-        $pinjam = Peminjaman::where('anggota_id', Auth::id())->findOrFail($request->pinjam_id);
+        $pinjam = Peminjaman::where('anggota_id', Auth::id())
+            ->findOrFail($request->pinjam_id);
 
         if (!in_array($pinjam->status, ['dipinjam', 'terlambat'])) {
-            return back()->with('error', 'Sudah dikembalikan atau status tidak valid!');
+            return back()->with('error', 'Buku ini tidak bisa diajukan pengembalian sekarang.');
         }
 
-        $kembali = Carbon::today();
-        $hasilDenda = $pinjam->hitungDenda($kembali);
-        $terlambat = $hasilDenda['terlambat'];
-        $denda = $hasilDenda['jumlah_denda'];
+        $tanggalKembali = Carbon::today();
+        $batas          = Carbon::parse($pinjam->tanggal_wajib_kembali);
 
-        if ($denda > 0) {
+        // Hitung denda keterlambatan (kondisi masih 'baik' karena belum dicek petugas)
+        $hariTerlambat = $tanggalKembali->gt($batas)
+            ? (int) $batas->diffInDays($tanggalKembali)
+            : 0;
+        $dendaTerlambat = $hariTerlambat * 2000;
+
+        // Update peminjaman: status dikembalikan, kondisi default baik
+        // Denda final baru akan ditetapkan petugas saat menerima buku fisik
+        $pinjam->kondisi        = 'baik'; // default; petugas bisa ubah via kembalikan()
+        $pinjam->tanggal_kembali = $tanggalKembali;
+        $pinjam->status          = 'dikembalikan';
+        $pinjam->terlambat       = $hariTerlambat;
+        $pinjam->denda           = $dendaTerlambat;
+        $pinjam->status_denda    = $dendaTerlambat > 0 ? 'belum_bayar' : 'sudah_bayar';
+        $pinjam->save();
+
+        // Buat record denda jika terlambat
+        if ($dendaTerlambat > 0) {
             \App\Models\Denda::updateOrCreate(
                 ['peminjaman_id' => $pinjam->id],
                 [
-                    'terlambat' => $terlambat,
-                    'jumlah_denda' => $denda,
-                    'status' => 'belum_bayar'
+                    'terlambat'    => $hariTerlambat,
+                    'jumlah_denda' => $dendaTerlambat,
+                    'status'       => 'belum_bayar',
                 ]
             );
         } else {
             \App\Models\Denda::where('peminjaman_id', $pinjam->id)->delete();
         }
 
-        $pinjam->update([
-            'status' => 'dikembalikan',
-            'tanggal_kembali' => $kembali,
-            'terlambat' => $terlambat,
-            'denda' => $denda,
-            'status_denda' => $denda > 0 ? 'belum_bayar' : 'sudah_bayar',
-        ]);
-
+        // Kembalikan stok (kondisi baik sementara sampai petugas cek)
         $buku = Buku::find($pinjam->buku_id);
         if ($buku) {
             $buku->increment('stok');
             $buku->refresh()->syncStatus();
         }
 
-        return back()->with('success', 'Pengembalian berhasil!');
+        return back()->with('success', 'Pengajuan pengembalian berhasil! Petugas akan memverifikasi kondisi buku.');
     }
 }

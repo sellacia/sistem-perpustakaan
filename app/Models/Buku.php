@@ -9,10 +9,9 @@ class Buku extends Model
 {
     use HasFactory;
 
-    // Nama tabel (karena bukan "bukus")
     protected $table = 'buku';
+    public $timestamps = false;
 
-    // Biar bisa insert/update
     protected $fillable = [
         'kode_buku',
         'judul',
@@ -23,11 +22,8 @@ class Buku extends Model
         'stok',
         'status',
         'cover',
-        'deskripsi'
+        'deskripsi',
     ];
-
-    // Kalau gak pakai created_at & updated_at
-    public $timestamps = false;
 
     public function peminjaman()
     {
@@ -37,12 +33,24 @@ class Buku extends Model
     public function peminjamanAktif()
     {
         return $this->hasMany(\App\Models\Peminjaman::class, 'buku_id')
-            ->whereIn('status', ['menunggu', 'dipinjam', 'terlambat', 'dikembalikan']);
+            ->whereIn('status', ['menunggu', 'dipinjam', 'terlambat']);
     }
 
+    /**
+     * Sync status buku:
+     * - 'tersedia'  → stok > 0 dan tidak ada peminjaman aktif (dipinjam/terlambat)
+     * - 'dipinjam'  → stok <= 0 atau ada peminjaman aktif
+     *
+     * Catatan: status 'dikembalikan' & 'menunggu' tidak dihitung sebagai aktif
+     * karena buku sudah ada di rak atau belum disetujui.
+     */
     public function syncStatus(): void
     {
-        $statusBaru = $this->peminjamanAktif()->exists() || $this->stok <= 0 ? 'dipinjam' : 'tersedia';
+        $adaPeminjamanAktif = $this->peminjaman()
+            ->whereIn('status', ['dipinjam', 'terlambat'])
+            ->exists();
+
+        $statusBaru = ($this->stok <= 0 || $adaPeminjamanAktif) ? 'dipinjam' : 'tersedia';
 
         if ($this->status !== $statusBaru) {
             $this->forceFill(['status' => $statusBaru])->save();

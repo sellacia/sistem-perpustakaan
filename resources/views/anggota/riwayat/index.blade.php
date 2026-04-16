@@ -31,6 +31,7 @@
                         <th class="px-6 py-4">Buku</th>
                         <th class="px-6 py-4">Pinjam / Batas</th>
                         <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Kondisi</th>
                         <th class="px-6 py-4">Denda</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
@@ -90,33 +91,40 @@
                                 </span>
                             </td>
 
-                            <!-- DENDA -->
-                            <td class="px-6 py-4">
+                            {{-- KONDISI --}}
+                            <td class="px-6 py-4 text-center">
+                                @if($item->kondisi === 'baik')
+                                    <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold border-emerald-200 bg-emerald-50 text-emerald-700">Baik</span>
+                                @elseif($item->kondisi === 'rusak')
+                                    <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold border-amber-200 bg-amber-50 text-amber-700">Rusak</span>
+                                @elseif($item->kondisi === 'hilang')
+                                    <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold border-rose-200 bg-rose-50 text-rose-700">Hilang</span>
+                                @else
+                                    <span class="text-slate-400 text-xs">-</span>
+                                @endif
+                            </td>
 
+                            {{-- DENDA --}}
+                            <td class="px-6 py-4">
                                 @if ($item->dendaData)
-                                    <!-- Jumlah denda -->
-                                    <p class="font-semibold text-slate-900">
+                                    <p class="font-semibold
+                                        {{ $item->dendaData->status === 'sudah_bayar' ? 'text-emerald-600' : 'text-rose-600' }}">
                                         Rp {{ number_format($item->dendaData->jumlah_denda, 0, ',', '.') }}
                                     </p>
-
-                                    <!-- Status pembayaran -->
-                                    <p
-                                        class="mt-1 text-xs font-semibold
-                                        {{ $item->dendaData->status == 'belum_bayar'
-                                            ? 'text-rose-600'
-                                            : ($item->dendaData->status == 'menunggu_konfirmasi'
-                                                ? 'text-amber-600'
-                                                : 'text-emerald-600') }}">
-
-                                        {{ $item->dendaData->status == 'belum_bayar'
-                                            ? 'Belum dibayar'
-                                            : ($item->dendaData->status == 'menunggu_konfirmasi'
-                                                ? 'Menunggu konfirmasi petugas'
-                                                : 'Sudah dibayar') }}
+                                    @if($item->kondisi && in_array($item->kondisi, ['rusak','hilang']))
+                                        <p class="text-xs text-slate-400 mt-1">
+                                            Termasuk denda
+                                            {{ $item->kondisi === 'rusak' ? 'buku rusak (+Rp50.000)' : 'buku hilang (+Rp100.000)' }}
+                                        </p>
+                                    @endif
+                                    <p class="mt-1 text-xs font-semibold
+                                        {{ $item->dendaData->status === 'belum_bayar' ? 'text-rose-600'
+                                            : ($item->dendaData->status === 'menunggu_konfirmasi' ? 'text-amber-600' : 'text-emerald-600') }}">
+                                        {{ $item->dendaData->status === 'belum_bayar' ? 'Belum dibayar'
+                                            : ($item->dendaData->status === 'menunggu_konfirmasi' ? 'Menunggu konfirmasi petugas' : 'Sudah dibayar') }}
                                     </p>
                                 @else
-                                    <!-- Jika tidak ada denda -->
-                                    <span class="text-slate-400">-</span>
+                                    <span class="text-slate-400">Tidak ada</span>
                                 @endif
                             </td>
 
@@ -159,7 +167,7 @@
                     @empty
                         <!-- Jika tidak ada data -->
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
                                 Belum ada riwayat peminjaman.
                             </td>
                         </tr>

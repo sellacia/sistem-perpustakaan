@@ -10,49 +10,27 @@ use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
+    /**
+     * Daftar semua peminjaman. Update status 'terlambat' otomatis di sini.
+     */
     public function index()
     {
         $today = Carbon::today();
 
-        $peminjamanTelat = Peminjaman::whereIn('status', ['dipinjam', 'terlambat', 'menunggu'])
+        // Auto-update status: jika belum kembali dan sudah lewat batas → terlambat
+        Peminjaman::whereIn('status', ['dipinjam'])
             ->where('tanggal_wajib_kembali', '<', $today)
             ->whereNull('tanggal_kembali')
-            ->get();
-
-        foreach ($peminjamanTelat as $pinjam) {
-            if ($pinjam->status === 'dipinjam' || $pinjam->status === 'terlambat') {
-                $pinjam->update(['status' => 'terlambat']);
-            }
-
-            $hasilDenda = $pinjam->hitungDenda($today);
-            $terlambat = $hasilDenda['terlambat'];
-
-            if ($terlambat > 0) {
-                $statusDendaSaatIni = in_array($pinjam->status_denda, ['menunggu_konfirmasi', 'sudah_bayar'], true)
-                    ? $pinjam->status_denda
-                    : ($pinjam->dendaData->status ?? $pinjam->status_denda ?? 'belum_bayar');
-
-                $pinjam->update([
-                    'terlambat' => $terlambat,
-                    'denda' => $hasilDenda['jumlah_denda'],
-                    'status_denda' => $statusDendaSaatIni,
-                ]);
-
-                Denda::updateOrCreate(
-                    ['peminjaman_id' => $pinjam->id],
-                    [
-                        'terlambat'    => $terlambat,
-                        'jumlah_denda' => $hasilDenda['jumlah_denda'],
-                        'status'       => $statusDendaSaatIni,
-                    ]
-                );
-            }
-        }
+            ->update(['status' => 'terlambat']);
 
         $data = Peminjaman::with(['buku', 'anggota', 'dendaData'])->latest()->get();
+
         return view('petugas.peminjaman.index', compact('data'));
     }
 
+    /**
+     * Petugas menyetujui pengajuan peminjaman anggota.
+     */
     public function setujui($id)
     {
         $pinjam = Peminjaman::findOrFail($id);
@@ -62,117 +40,51 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
         }
 
+        // Cek batas 3 buku aktif
         $pinjamanAktifAnggota = Peminjaman::where('anggota_id', $pinjam->anggota_id)
-            ->borrowingInProgress()
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
 
-        if ($pinjamanAktifAnggota > 3) {
+        if ($pinjamanAktifAnggota >= 3) {
             return back()->with('error', 'Anggota ini sudah mencapai batas maksimal 3 buku aktif.');
         }
 
-        if ($buku && $buku->stok <= 0) {
+        // Cek stok buku
+        if (!$buku || $buku->stok <= 0) {
             return back()->with('error', 'Stok buku habis!');
         }
 
+        // Setujui: set status dipinjam & tanggal wajib kembali 7 hari dari sekarang
         $pinjam->update([
             'status'               => 'dipinjam',
+            'tanggal_pinjam'       => now(),
             'tanggal_wajib_kembali' => now()->addDays(7),
             'tanggal_kembali'      => null,
         ]);
 
-        //  TAMBAHAN (INI DOANG YANG DIUBAH)
-        if ($buku) {
-            $buku->decrement('stok');
-            $buku->refresh()->syncStatus();
-        }
+        // Kurangi stok
+        $buku->decrement('stok');
+        $buku->refresh()->syncStatus();
 
         return back()->with('success', 'Peminjaman disetujui!');
     }
+
+    /**
+     * Petugas menolak pengajuan peminjaman anggota.
+     */
     public function tolak($id)
     {
-        $pinjam = Peminjaman::with('dendaData')->findOrFail($id);
+        $pinjam = Peminjaman::findOrFail($id);
 
         if ($pinjam->status !== 'menunggu') {
             return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
         }
 
-        $alasan = [];
-
-        // CEK: masih pinjam buku lain
-        $masihPinjam = Peminjaman::where('anggota_id', $pinjam->anggota_id)
-            ->where('status', 'dipinjam')
-            ->exists();
-
-        if ($masihPinjam) {
-            $alasan[] = 'Masih memiliki buku yang belum dikembalikan';
-        }
-
-        //  CEK: ada denda
-        if ($pinjam->dendaData && $pinjam->dendaData->jumlah > 0) {
-            $alasan[] = 'Memiliki tunggakan denda';
-        }
-
-        $alasanText = implode(', ', $alasan);
-
-        //  update
         $pinjam->update([
-            'status' => 'ditolak',
-            'alasan_tolak' => $alasanText ?: 'Tidak memenuhi syarat'
+            'status'       => 'ditolak',
+            'alasan_tolak' => 'Ditolak oleh petugas',
         ]);
 
-        //  balikin stok
-        $buku = Buku::find($pinjam->buku_id);
-        if ($buku) {
-            $buku->increment('stok');
-            $buku->refresh()->syncStatus();
-        }
-
-        return back()->with('success', 'Peminjaman ditolak!');
-    }
-
-    public function kembalikan($id)
-    {
-        $pinjam = Peminjaman::findOrFail($id);
-
-        if (!in_array($pinjam->status, ['dipinjam', 'terlambat'])) {
-            return back()->with('error', 'Status peminjaman tidak valid untuk pengembalian!');
-        }
-
-        $today = Carbon::today();
-        $hasilDenda = $pinjam->hitungDenda($today);
-        $terlambat = $hasilDenda['terlambat'];
-        $jumlahDenda = $hasilDenda['jumlah_denda'];
-
-        $pinjam->update([
-            'status'          => 'dikembalikan',
-            'tanggal_kembali' => $today,
-            'terlambat'       => $terlambat,
-            'denda'           => $jumlahDenda,
-            'status_denda'    => $jumlahDenda > 0 ? 'belum_bayar' : 'sudah_bayar',
-        ]);
-
-        // Kembalikan stok
-        $buku = Buku::find($pinjam->buku_id);
-        if ($buku) {
-            $buku->increment('stok');
-            $buku->refresh()->syncStatus();
-        }
-
-        // Simpan denda jika ada
-        if ($jumlahDenda > 0) {
-            Denda::updateOrCreate(
-                ['peminjaman_id' => $pinjam->id],
-                [
-                    'terlambat'    => $terlambat,
-                    'jumlah_denda' => $jumlahDenda,
-                    'status'       => 'belum_bayar',
-                ]
-            );
-        } else {
-            Denda::where('peminjaman_id', $pinjam->id)->delete();
-        }
-
-        return redirect()->route('petugas.pengembalian')
-            ->with('success', 'Buku dikembalikan & denda masuk ke kelola denda');
+        return back()->with('success', 'Peminjaman ditolak.');
     }
 }

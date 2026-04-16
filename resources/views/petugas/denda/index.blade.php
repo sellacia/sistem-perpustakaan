@@ -61,7 +61,8 @@
                         <th class="px-6 py-4">Anggota</th>
                         <th class="px-6 py-4">Buku</th>
                         <th class="px-6 py-4 text-center">Terlambat</th>
-                        <th class="px-6 py-4 text-right">Jumlah</th>
+                        <th class="px-6 py-4 text-center">Kondisi</th>
+                        <th class="px-6 py-4 text-right">Total Denda</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
@@ -78,6 +79,17 @@
                         <td class="px-6 py-4 font-semibold text-slate-900">{{ $d->peminjaman->anggota->name ?? ($d->peminjaman->nama ?? '-') }}</td>
                         <td class="px-6 py-4 text-slate-700">{{ $d->peminjaman->buku->judul ?? '-' }}</td>
                         <td class="px-6 py-4 text-center"><span class="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">{{ $d->terlambat }} hari</span></td>
+                        <td class="px-6 py-4 text-center">
+                            @if($d->peminjaman->kondisi === 'baik')
+                                <span class="text-emerald-600 font-semibold text-xs">Baik</span>
+                            @elseif($d->peminjaman->kondisi === 'rusak')
+                                <span class="text-amber-600 font-semibold text-xs">Rusak (+Rp 50rb)</span>
+                            @elseif($d->peminjaman->kondisi === 'hilang')
+                                <span class="text-rose-600 font-semibold text-xs">Hilang (+Rp 100rb)</span>
+                            @else
+                                <span class="text-slate-400 text-xs">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-right font-bold text-slate-900">Rp {{ number_format($d->jumlah_denda, 0, ',', '.') }}</td>
                         <td class="px-6 py-4 text-center">
                             <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold {{ $statusDenda == 'belum_bayar' ? 'border-rose-200 bg-rose-50 text-rose-700' : ($statusDenda == 'menunggu_konfirmasi' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700') }}">
@@ -106,7 +118,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-slate-400">Tidak ada data denda.</td>
+                        <td colspan="8" class="px-6 py-12 text-center text-slate-400">Tidak ada data denda.</td>
                     </tr>
                     @endforelse
                 </tbody>
